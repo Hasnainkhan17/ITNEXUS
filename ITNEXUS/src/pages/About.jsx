@@ -61,8 +61,8 @@ export default function About() {
             <h3 className="text-xl font-bold text-brand-navy">Operational Metrics</h3>
             <div className="grid grid-cols-2 gap-6">
               <div className="space-y-1">
-                <div className="text-4xl font-extrabold text-brand-blue">99.9%</div>
-                <div className="text-xs font-semibold text-brand-slate uppercase tracking-wider">Uptime Reliability</div>
+                <div className="text-4xl font-extrabold text-brand-blue">5+</div>
+                <div className="text-xs font-semibold text-brand-slate uppercase tracking-wider">Countries Served</div>
               </div>
               <div className="space-y-1">
                 <div className="text-4xl font-extrabold text-brand-cyan">50+</div>

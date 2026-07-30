@@ -40,15 +40,17 @@ export default function Team() {
             return (
               <div 
                 key={member._id} 
-                className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start border border-slate-200/60 p-8 sm:p-12 rounded-3xl bg-slate-50/30 shadow-sm"
+                className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border border-slate-200/60 p-5 sm:p-6 rounded-3xl bg-slate-50/30 shadow-sm"
               >
                 {/* Left Column: Photo & Basic Details */}
                 <div className="lg:col-span-4 text-center lg:text-left space-y-4">
-                  <img
-                    src={resolveAssetUrl(member.imageUrl)}
-                    alt={member.name}
-                    className="w-36 h-36 rounded-full object-cover mx-auto lg:mx-0 ring-4 ring-white shadow-md"
-                  />
+                  <div className="w-full max-w-[170px] aspect-[4/5] bg-slate-100 rounded-2xl border border-slate-200 overflow-hidden mx-auto lg:mx-0 shadow-sm">
+                    <img
+                      src={resolveAssetUrl(member.imageUrl)}
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
                   <div>
                     <h2 className="text-xl font-bold text-brand-navy">{member.name}</h2>
                     <p className="text-xs font-semibold text-brand-blue uppercase tracking-wider mt-1">{member.role}</p>

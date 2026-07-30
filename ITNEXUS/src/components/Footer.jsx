@@ -30,15 +30,26 @@ export default function Footer() {
 
                             {/* Stacked Links */}
                             <div className="flex flex-col space-y-2.5 pt-1">
-                                {col.links.map((link, lIdx) => (
-                                    <a
-                                        key={lIdx}
-                                        href={link.url}
-                                        className="text-sm text-slate-600 hover:text-brand-blue hover:translate-x-1 transition-all duration-200 block"
-                                    >
-                                        {link.label}
-                                    </a>
-                                ))}
+                                {col.links.map((link, lIdx) => {
+                                    const isExternal = link.url.startsWith('mailto:') || link.url.startsWith('tel:') || link.url.startsWith('http');
+                                    return isExternal ? (
+                                        <a
+                                            key={lIdx}
+                                            href={link.url}
+                                            className="text-sm text-slate-600 hover:text-brand-blue hover:translate-x-1 transition-all duration-200 block"
+                                        >
+                                            {link.label}
+                                        </a>
+                                    ) : (
+                                        <Link
+                                            key={lIdx}
+                                            to={link.url}
+                                            className="text-sm text-slate-600 hover:text-brand-blue hover:translate-x-1 transition-all duration-200 block"
+                                        >
+                                            {link.label}
+                                        </Link>
+                                    );
+                                })}
                             </div>
                         </div>
                     ))}
@@ -49,7 +60,7 @@ export default function Footer() {
                     <div className="flex gap-6 items-center">
                         <a href="#" className="hover:text-slate-600 transition-colors">Privacy Policy</a>
                         <a href="#" className="hover:text-slate-600 transition-colors">Terms of Service</a>
-                        <Link to="/admin/login" className="text-[10px] font-bold tracking-wider text-brand-blue uppercase bg-brand-blue/5 hover:bg-brand-blue/10 px-2 py-0.5 rounded transition-all border border-brand-blue/10">Admin Console</Link>
+                        <Link to="/admin/login" className="text-[10px] font-bold tracking-wider text-brand-blue uppercase bg-brand-blue/5 hover:bg-brand-blue/10 px-2 py-0.5 rounded transition-all border border-brand-blue/10 opacity-50">Admin Console</Link>
                     </div>
                 </div>
             </div>

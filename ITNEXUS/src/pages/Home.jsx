@@ -69,27 +69,19 @@ export default function Home() {
       {/* 1. HERO SECTION WITH FULL BACKGROUND */}
       <section
         id="home"
-        className="w-screen relative left-1/2 right-1/2 -translate-x-1/2 pt-48 pb-32 px-6 lg:px-12 border-b border-slate-200/60 overflow-hidden bg-slate-950 flex items-center justify-center min-h-[85vh]"
+        className="w-screen min-h-screen md:h-screen  relative left-1/2 right-1/2 -translate-x-1/2 pt-36 pb-20 md:pt-48 md:pb-32 px-6 lg:px-12 border-b border-slate-200/60 overflow-hidden bg-slate-950 flex items-center justify-center "
         style={{
           backgroundImage: `url(${heroBg})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed'
         }}
       >
         {/* Backdrop overlay for maximum contrast */}
         <div className="absolute inset-0 bg-slate-950/60 z-0" />
 
         <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6 pt-10">
-
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            className="inline-block bg-white/10 backdrop-blur-md border border-white/20 text-brand-cyan text-xs font-bold px-4 py-1.5 rounded-full tracking-wide font-mono uppercase"
-          >
-            ✨ Next Generation IT Engineering & Design
-          </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 20 }}
@@ -159,8 +151,8 @@ export default function Home() {
             <div className="relative border border-slate-200/60 p-6 rounded-3xl bg-slate-50/50 shadow-inner overflow-hidden">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                  <div className="text-3xl font-black text-brand-blue mb-1">99.9%</div>
-                  <div className="text-xs font-semibold text-brand-slate uppercase tracking-wider">Uptime SLA</div>
+                  <div className="text-3xl font-black text-brand-blue mb-1">5+</div>
+                  <div className="text-xs font-semibold text-brand-slate uppercase tracking-wider">Countries Served</div>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
                   <div className="text-3xl font-black text-brand-cyan mb-1">50+</div>
@@ -199,7 +191,7 @@ export default function Home() {
               <motion.div
                 key={service._id}
                 variants={fadeInUp}
-                className="bg-white p-6 rounded-2xl border border-slate-150 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-350 flex flex-col justify-between"
+                className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-350 flex flex-col justify-between"
               >
                 <div>
                   <div className="h-12 w-12 rounded-xl bg-brand-blue/5 text-brand-blue flex items-center justify-center font-bold text-xl mb-4 border border-brand-blue/5">
@@ -272,7 +264,7 @@ export default function Home() {
               whileInView="visible"
               viewport={{ once: true }}
               variants={fadeInUp}
-              className="bg-white rounded-2xl border border-slate-200/60 overflow-hidden shadow-sm hover:shadow-md transition-all group flex flex-col h-full"
+              className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-all group flex flex-col h-full"
             >
               <div className="relative overflow-hidden aspect-video bg-slate-100">
                 <img
@@ -321,7 +313,7 @@ export default function Home() {
           <div>
             <Link
               to="/team"
-              className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-brand-navy font-semibold px-6 py-3 rounded-full border border-slate-200 shadow-sm transition-all text-sm"
+              className="inline-flex bg-brand-navy text-white items-center gap-2  hover:bg-brand-navy/90 font-semibold px-6 py-3 rounded-full border border-slate-200 shadow-sm transition-all text-sm"
             >
               Meet Full Team
               <ArrowRight className="w-4 h-4" />
@@ -331,21 +323,25 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {team.map((member) => (
-            <div key={member._id} className="bg-white p-6 rounded-2xl border border-slate-250/60 shadow-sm hover:shadow-md transition-all text-center flex flex-col justify-between h-full">
+            <div key={member._id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all text-center flex flex-col justify-between h-full overflow-hidden">
               <div>
-                <img
-                  src={resolveAssetUrl(member.imageUrl)}
-                  alt={member.name}
-                  className="w-24 h-24 rounded-full mx-auto object-cover mb-4 ring-4 ring-slate-100"
-                />
-                <h3 className="text-lg font-bold text-brand-navy">{member.name}</h3>
-                <p className="text-xs font-semibold text-brand-blue mb-3 tracking-wider uppercase">{member.role}</p>
-                <p className="text-xs text-brand-slate leading-relaxed font-body max-w-xs mx-auto mb-4">
-                  {member.shortBio}
-                </p>
+                <div className="w-full h-50 bg-slate-100 relative overflow-hidden">
+                  <img
+                    src={resolveAssetUrl(member.imageUrl)}
+                    alt={member.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6 pb-2">
+                  <h3 className="text-lg font-bold text-brand-navy mb-1">{member.name}</h3>
+                  <p className="text-xs font-semibold text-brand-blue mb-3 tracking-wider uppercase">{member.role}</p>
+                  <p className="text-xs text-brand-slate leading-relaxed font-body max-w-xs mx-auto">
+                    {member.shortBio}
+                  </p>
+                </div>
               </div>
               {member.linkedinUrl && (
-                <div className="pt-2">
+                <div className="pb-6 pt-2">
                   <a
                     href={member.linkedinUrl}
                     target="_blank"

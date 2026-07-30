@@ -6,11 +6,15 @@
     "postinstall": "cd server && npm install",
     "start": "cd server && node server.js",
     "build": "cd ITNEXUS && npm install && npm run build && node ../scripts/sync-frontend.js",
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "dev:frontend": "cd ITNEXUS && npm run dev",
     "dev:backend": "cd server && npm run dev",
     "seed": "cd server && node seed.js"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.4"
   }
 }

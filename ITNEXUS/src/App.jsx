@@ -28,11 +28,11 @@ function MainLayout() {
   const isAdminPath = location.pathname.startsWith('/admin');
 
   return (
-    <div className="bg-[#FAFAFC] text-slate-800 font-sans antialiased selection:bg-brand-blue selection:text-white min-h-screen overflow-x-hidden">
+    <div className="bg-white text-slate-800 font-sans antialiased selection:bg-brand-blue selection:text-white min-h-screen overflow-x-hidden">
       {!isAdminPath && <Navbar />}
 
       {/* Main Container defined by light borders on both sides (Stripe style) */}
-      <div className={`${isAdminPath ? 'w-full' : 'max-w-[1200px] mx-auto border-x border-slate-200/60 bg-white shadow-[0_0_50px_rgba(0,0,0,0.01)]'} min-h-screen flex flex-col relative`}>
+      <div className={`${isAdminPath ? 'w-full' : 'max-w-[1200px] mx-auto border-x border-slate-200/60 bg-[#FAFAFC] shadow-[0_0_50px_rgba(0,0,0,0.01)]'} min-h-screen flex flex-col relative`}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />

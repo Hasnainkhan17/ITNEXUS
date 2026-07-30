@@ -53,27 +53,27 @@ export const footerCategories = [
     {
         title: "Services",
         links: [
-            { label: "Web Development", url: "#services" },
-            { label: "UI/UX Design", url: "#services" },
-            { label: "Cloud Infrastructure", url: "#services" },
-            { label: "Custom Software", url: "#services" }
+            { label: "Web Development", url: "/services" },
+            { label: "UI/UX Design", url: "/services" },
+            { label: "Cloud Infrastructure", url: "/services" },
+            { label: "Custom Software", url: "/services" }
         ]
     },
     {
         title: "Company",
         links: [
-            { label: "About Us", url: "#about" },
-            { label: "Our Team", url: "#team" },
-            { label: "Careers", url: "#" },
-            { label: "Client Cases", url: "#" }
+            { label: "About Us", url: "/about" },
+            { label: "Our Team", url: "/team" },
+            { label: "Careers", url: "/contact" },
+            { label: "Client Cases", url: "/projects" }
         ]
     },
     {
         title: "Contact Info",
         links: [
-            { label: "📧 contact@nextgensolutions.com", url: "mailto:contact@nextgensolutions.com" },
+            { label: "📧 info@itnexus.org", url: "mailto:info@itnexus.org" },
             { label: "📞 +92 (300) 123-4567", url: "tel:+923001234567" },
-            { label: "📍 Regional Office, PK", url: "#contact" }
+            { label: "📍 Regional Office, PK", url: "/contact" }
         ]
     }
 ];
