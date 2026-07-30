@@ -1,0 +1,107 @@
+import React, { useState, useEffect } from 'react';
+import { ShieldAlert, Award } from 'lucide-react';
+import { API_BASE_URL } from '../config';
+import { resolveAssetUrl } from '../utils/assetLoader';
+import LinkedinIcon from '../components/LinkedinIcon';
+
+export default function Team() {
+  const [team, setTeam] = useState([]);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/team`)
+      .then(res => res.json())
+      .then(data => setTeam(data))
+      .catch(err => console.error('Error fetching team:', err));
+  }, []);
+
+
+
+  return (
+    <div className="w-full">
+      {/* Hero Section */}
+      <section className="pt-36 pb-20 px-6 lg:px-12 border-b border-slate-200/60 bg-gradient-to-b from-slate-50/50 to-white text-center">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="text-xs font-bold uppercase tracking-wider text-brand-blue font-mono bg-blue-50 text-blue-700 px-3 py-1 rounded inline-block">
+            Our Architects
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-brand-navy tracking-tight font-sans">
+            Meet the ITNEXUS Team
+          </h1>
+          <p className="text-lg text-brand-slate leading-relaxed">
+            The technical professionals, architects, and designers committed to delivering pristine software solutions.
+          </p>
+        </div>
+      </section>
+
+      {/* Profiles Grid */}
+      <section className="py-20 px-6 lg:px-12 bg-white border-b border-slate-200/60">
+        <div className="max-w-7xl mx-auto space-y-16">
+          {team.map((member) => {
+            return (
+              <div 
+                key={member._id} 
+                className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start border border-slate-200/60 p-8 sm:p-12 rounded-3xl bg-slate-50/30 shadow-sm"
+              >
+                {/* Left Column: Photo & Basic Details */}
+                <div className="lg:col-span-4 text-center lg:text-left space-y-4">
+                  <img
+                    src={resolveAssetUrl(member.imageUrl)}
+                    alt={member.name}
+                    className="w-36 h-36 rounded-full object-cover mx-auto lg:mx-0 ring-4 ring-white shadow-md"
+                  />
+                  <div>
+                    <h2 className="text-xl font-bold text-brand-navy">{member.name}</h2>
+                    <p className="text-xs font-semibold text-brand-blue uppercase tracking-wider mt-1">{member.role}</p>
+                  </div>
+                  
+                  {/* Social Buttons */}
+                  {member.linkedinUrl && (
+                    <div className="flex justify-center lg:justify-start gap-3">
+                      <a 
+                        href={member.linkedinUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="p-2.5 rounded-lg bg-white border border-slate-200 text-brand-slate hover:text-brand-blue transition-colors flex items-center gap-1.5 text-xs font-bold font-mono"
+                        title="LinkedIn Profile"
+                      >
+                        <LinkedinIcon className="w-4 h-4 text-brand-blue" />
+                        <span>LinkedIn</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column: Bio */}
+                <div className="lg:col-span-8 space-y-6">
+                  {/* Bio block */}
+                  <div className="space-y-3">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-brand-navy font-mono flex items-center gap-2">
+                      <Award className="w-4 h-4 text-brand-cyan" />
+                      Professional Biography
+                    </h3>
+                    <p className="text-brand-slate leading-relaxed text-sm">
+                      {member.fullBio || member.shortBio}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Advisory Section */}
+      <section className="py-20 px-6 lg:px-12 bg-white text-center">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="h-12 w-12 rounded-xl bg-brand-blue/5 text-brand-blue flex items-center justify-center mx-auto border border-brand-blue/10 mb-4">
+            <ShieldAlert className="w-6 h-6" />
+          </div>
+          <h2 className="text-2xl font-bold text-brand-navy">Advisory & Security Protocols</h2>
+          <p className="text-brand-slate leading-relaxed text-sm max-w-xl mx-auto">
+            All team architects hold industry-recognized cloud architecture and secure systems certifications. We perform periodic reviews on deployment pipelines and internal databases to assure absolute security compliance.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}
