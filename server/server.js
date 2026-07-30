@@ -1,3 +1,4 @@
+// Trigger Hostinger Passenger restart: 2026-07-30
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
