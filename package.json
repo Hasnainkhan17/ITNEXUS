@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "cd server && npm install",
     "start": "cd server && node server.js",
-    "build": "cd ITNEXUS && npm install && npm run build",
+    "build": "cd ITNEXUS && npm install && npm run build && node ../scripts/sync-frontend.js",
     "dev:frontend": "cd ITNEXUS && npm run dev",
     "dev:backend": "cd server && npm run dev",
     "seed": "cd server && node seed.js"

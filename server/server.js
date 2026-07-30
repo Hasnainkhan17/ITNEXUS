@@ -48,8 +48,24 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'ITNEXUS API is healthy' });
 });
 
+// Return JSON 404 for unknown /api/* routes
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ error: 'API route not found' });
+});
+
 // Serve the built React frontend in production
-const frontendBuildPath = path.join(__dirname, '..', 'ITNEXUS', 'dist');
+const fs = require('fs');
+const publicPath = path.join(__dirname, 'public');
+const fallbackPath = path.join(__dirname, '..', 'ITNEXUS', 'dist');
+
+let frontendBuildPath;
+if (fs.existsSync(path.join(publicPath, 'index.html'))) {
+  frontendBuildPath = publicPath;
+} else {
+  frontendBuildPath = fallbackPath;
+}
+console.log(`Serving frontend from: ${frontendBuildPath}`);
+
 app.use(express.static(frontendBuildPath));
 
 // SPA catch-all: any non-API route serves the React app's index.html
