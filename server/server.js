@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 
@@ -12,7 +13,25 @@ connectDB();
 const app = express();
 
 // Middlewares
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5000',
+];
+if (process.env.FRONTEND_URL) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (e.g., same-origin, mobile apps, Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all in production since frontend is same domain
+    }
+  },
+  credentials: true,
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes declarations
@@ -27,6 +46,15 @@ app.use('/api/blogs', require('./routes/blogs'));
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'ITNEXUS API is healthy' });
+});
+
+// Serve the built React frontend in production
+const frontendBuildPath = path.join(__dirname, '..', 'ITNEXUS', 'dist');
+app.use(express.static(frontendBuildPath));
+
+// SPA catch-all: any non-API route serves the React app's index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(frontendBuildPath, 'index.html'));
 });
 
 // Start server

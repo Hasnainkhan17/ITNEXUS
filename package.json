@@ -1,0 +1,17 @@
+{
+  "name": "itnexus-fullstack",
+  "version": "1.0.0",
+  "description": "ITNEXUS Corporate Portal - Full Stack Application",
+  "scripts": {
+    "install:all": "cd ITNEXUS && npm install && cd ../server && npm install",
+    "build:frontend": "cd ITNEXUS && npm run build",
+    "postinstall": "npm run install:all && npm run build:frontend",
+    "start": "cd server && node server.js",
+    "dev:frontend": "cd ITNEXUS && npm run dev",
+    "dev:backend": "cd server && npm run dev",
+    "seed": "cd server && node seed.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
