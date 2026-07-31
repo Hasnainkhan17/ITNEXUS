@@ -8,6 +8,8 @@ import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
 import LinkedinIcon from '../components/LinkedinIcon';
 
+import useSeo from '../utils/useSeo';
+
 // Map icon strings to Lucide icon components
 const iconMap = {
   Code: Code,
@@ -17,10 +19,16 @@ const iconMap = {
 };
 
 export default function Home() {
+  useSeo({
+    title: 'Home',
+    description: 'ITNEXUS builds custom React apps, scalable cloud architectures, premium UI/UX, and robust systems for next generation businesses.'
+  });
+
   const [featuredProjects, setFeaturedProjects] = useState([]);
   const [team, setTeam] = useState([]);
   const [clients, setClients] = useState([]);
   const [services, setServices] = useState([]);
+  const [pageContent, setPageContent] = useState(null);
 
   useEffect(() => {
     // Fetch featured projects
@@ -46,7 +54,18 @@ export default function Home() {
       .then(res => res.json())
       .then(data => setServices(data))
       .catch(err => console.error('Error fetching services:', err));
+
+    // Fetch page contents settings
+    fetch(`${API_BASE_URL}/page-contents`)
+      .then(res => res.json())
+      .then(data => setPageContent(data))
+      .catch(err => console.error('Error fetching page contents:', err));
   }, []);
+
+  const resolveHeroBg = (imageName) => {
+    if (!imageName || imageName === 'hero.png') return heroBg;
+    return resolveAssetUrl(imageName);
+  };
 
   // Fade-in animation parameters
   const fadeInUp = {
@@ -71,7 +90,7 @@ export default function Home() {
         id="home"
         className="w-screen min-h-screen md:h-screen  relative left-1/2 right-1/2 -translate-x-1/2 pt-36 pb-20 md:pt-48 md:pb-32 px-6 lg:px-12 border-b border-slate-200/60 overflow-hidden bg-slate-950 flex items-center justify-center "
         style={{
-          backgroundImage: `url(${heroBg})`,
+          backgroundImage: `url(${resolveHeroBg(pageContent?.homeHeroBgImage)})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -89,7 +108,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight leading-tight font-sans"
           >
-            We Build Dynamic Software for <span className="bg-gradient-to-r from-brand-cyan to-blue-400 bg-clip-text text-transparent">Next Generation</span> Businesses
+            {pageContent?.homeHeroHeading || "We Build Dynamic Software for Next Generation Businesses"}
           </motion.h1>
 
           <motion.p
@@ -98,7 +117,7 @@ export default function Home() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-base sm:text-lg text-slate-200 leading-relaxed max-w-2xl mx-auto"
           >
-            ITNEXUS delivers custom React apps, scalable cloud architectures, premium UI/UX, and robust system engineering to power global digital transformations.
+            {pageContent?.homeHeroParagraph || "ITNEXUS delivers custom React apps, scalable cloud architectures, premium UI/UX, and robust system engineering to power global digital transformations."}
           </motion.p>
 
           <motion.div
@@ -132,10 +151,10 @@ export default function Home() {
               About ITNEXUS
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-brand-navy leading-snug">
-              Delivering high-profile digital experiences with absolute precision engineering.
+              {pageContent?.homeAboutHeading || "Delivering high-profile digital experiences with absolute precision engineering."}
             </h2>
             <p className="text-brand-slate text-base leading-relaxed">
-              At ITNEXUS, we bridge the gap between complex software architecture and outstanding user experiences. Our core capabilities span across custom web apps, Cloud infrastructure engineering, and intuitive design system creations. We operate with a mission to empower businesses with high-performance, secure, and scalable solutions that drive measurable success.
+              {pageContent?.homeAboutParagraph || "At ITNEXUS, we bridge the gap between complex software architecture and outstanding user experiences. Our core capabilities span across custom web apps, Cloud infrastructure engineering, and intuitive design system creations. We operate with a mission to empower businesses with high-performance, secure, and scalable solutions that drive measurable success."}
             </p>
             <div>
               <Link
@@ -151,15 +170,21 @@ export default function Home() {
             <div className="relative border border-slate-200/60 p-6 rounded-3xl bg-slate-50/50 shadow-inner overflow-hidden">
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                  <div className="text-3xl font-black text-brand-blue mb-1">5+</div>
+                  <div className="text-3xl font-black text-brand-blue mb-1">
+                    {pageContent?.homeStatsCountries || "5+"}
+                  </div>
                   <div className="text-xs font-semibold text-brand-slate uppercase tracking-wider">Countries Served</div>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
-                  <div className="text-3xl font-black text-brand-cyan mb-1">50+</div>
+                  <div className="text-3xl font-black text-brand-cyan mb-1">
+                    {pageContent?.homeStatsProjects || "50+"}
+                  </div>
                   <div className="text-xs font-semibold text-brand-slate uppercase tracking-wider">Projects Shipped</div>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm col-span-2">
-                  <div className="text-3xl font-black text-brand-navy mb-1">100%</div>
+                  <div className="text-3xl font-black text-brand-navy mb-1">
+                    {pageContent?.homeStatsPrecision || "100%"}
+                  </div>
                   <div className="text-xs font-semibold text-brand-slate uppercase tracking-wider">Precision Engineered Delivery</div>
                 </div>
               </div>

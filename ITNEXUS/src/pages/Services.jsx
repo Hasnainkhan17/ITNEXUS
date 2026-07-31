@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Code, Palette, Cloud, Smartphone, Check, Send } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import useSeo from '../utils/useSeo';
 
 const iconMap = {
   Code: Code,
@@ -10,6 +11,11 @@ const iconMap = {
 };
 
 export default function Services() {
+  useSeo({
+    title: 'Services',
+    description: 'Specialized corporate software solutions, mobile applications, AWS migrations, automated deployment pipelines, and custom design systems.'
+  });
+
   const [services, setServices] = useState([]);
   const [selectedService, setSelectedService] = useState('');
   const [formData, setFormData] = useState({

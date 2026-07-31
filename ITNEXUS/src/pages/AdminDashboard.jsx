@@ -17,16 +17,42 @@ import {
   Code,
   Palette,
   Cloud,
-  Smartphone
+  Smartphone,
+  Settings,
+  Compass,
+  Zap,
+  Target,
+  Award,
+  Globe,
+  Heart,
+  Star,
+  Sparkles,
+  Smile,
+  MessageSquare,
+  Terminal,
+  HelpCircle
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
+import useSeo from '../utils/useSeo';
 
 const iconMap = {
-  Code: Code,
-  Palette: Palette,
-  Cloud: Cloud,
-  Smartphone: Smartphone
+  Code,
+  Palette,
+  Cloud,
+  Smartphone,
+  Compass,
+  Zap,
+  Target,
+  Award,
+  Globe,
+  Heart,
+  Star,
+  Sparkles,
+  Smile,
+  MessageSquare,
+  Terminal,
+  HelpCircle
 };
 
 const ImageInputOptions = ({ label, imageUrl, onChangeUrl, onFileSelected }) => {
@@ -88,6 +114,12 @@ const ImageInputOptions = ({ label, imageUrl, onChangeUrl, onFileSelected }) => 
 };
 
 export default function AdminDashboard() {
+  useSeo({
+    title: 'Admin Dashboard',
+    description: 'Management terminal for inquiries, services, projects, team profiles, and page settings.',
+    ogType: 'private'
+  });
+
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('inquiries');
   const [inquiries, setInquiries] = useState([]);
@@ -98,6 +130,31 @@ export default function AdminDashboard() {
   const [clients, setClients] = useState([]);
   const [services, setServices] = useState([]);
   const [blogs, setBlogs] = useState([]);
+
+  // Page Content Settings State
+  const [pageContent, setPageContent] = useState({
+    homeHeroBgImage: '',
+    homeHeroHeading: '',
+    homeHeroParagraph: '',
+    homeAboutHeading: '',
+    homeAboutParagraph: '',
+    homeStatsCountries: '',
+    homeStatsProjects: '',
+    homeStatsPrecision: '',
+    aboutHeroHeading: '',
+    aboutHeroParagraph: '',
+    aboutNarrativeHeading: '',
+    aboutNarrativeParagraph1: '',
+    aboutNarrativeParagraph2: '',
+    aboutStatsCountries: '',
+    aboutStatsClients: '',
+    aboutStatsTelemetry: '',
+    aboutValues: [],
+    aboutVisionStatement: ''
+  });
+  const [pageContentError, setPageContentError] = useState('');
+  const [pageContentSuccess, setPageContentSuccess] = useState(false);
+  const [newAboutValue, setNewAboutValue] = useState({ icon: 'Compass', title: '', description: '' });
 
   // Custom Delete Confirmation Modal State
   const [deleteConfirm, setDeleteConfirm] = useState({
@@ -213,6 +270,11 @@ export default function AdminDashboard() {
       const blogsRes = await fetch(`${API_BASE_URL}/blogs`, { headers });
       const blogsData = await blogsRes.json();
       setBlogs(blogsData);
+
+      // Fetch page contents settings
+      const pageContentsRes = await fetch(`${API_BASE_URL}/page-contents`, { headers });
+      const pageContentsData = await pageContentsRes.json();
+      setPageContent(pageContentsData);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
     }
@@ -667,6 +729,52 @@ export default function AdminDashboard() {
     );
   };
 
+  const handleSavePageSettings = async (e) => {
+    e.preventDefault();
+    setPageContentError('');
+    setPageContentSuccess(false);
+
+    const token = localStorage.getItem('adminToken');
+    try {
+      const response = await fetch(`${API_BASE_URL}/page-contents`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(pageContent)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPageContent(data);
+        setPageContentSuccess(true);
+        setTimeout(() => setPageContentSuccess(false), 3000);
+      } else {
+        const errData = await response.json();
+        setPageContentError(errData.message || 'Failed to update page settings.');
+      }
+    } catch (err) {
+      console.error(err);
+      setPageContentError('Network error updating page settings.');
+    }
+  };
+
+  const handleDeleteAboutValue = (indexToDelete) => {
+    const updatedValues = pageContent.aboutValues.filter((_, idx) => idx !== indexToDelete);
+    setPageContent({ ...pageContent, aboutValues: updatedValues });
+  };
+
+  const handleAddAboutValue = () => {
+    if (!newAboutValue.title || !newAboutValue.description) {
+      alert('Please fill out title and description for the new value.');
+      return;
+    }
+    const updatedValues = [...(pageContent.aboutValues || []), newAboutValue];
+    setPageContent({ ...pageContent, aboutValues: updatedValues });
+    setNewAboutValue({ icon: 'Compass', title: '', description: '' });
+  };
+
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-[#FAFAFC]">
       {/* Redesigned Fixed Vertical Sidebar */}
@@ -756,6 +864,18 @@ export default function AdminDashboard() {
               <FileText className="w-4 h-4" />
               <span>Blogs & Case Studies ({blogs.length})</span>
             </button>
+
+            <button
+              onClick={() => setActiveTab('pageSettings')}
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-colors ${
+                activeTab === 'pageSettings' 
+                  ? 'bg-brand-blue text-white shadow-md shadow-brand-blue/15' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              <span>Page Content Control</span>
+            </button>
           </nav>
         </div>
 
@@ -774,6 +894,347 @@ export default function AdminDashboard() {
       {/* Main Panel Content Area */}
       <main className="flex-grow lg:pl-[280px] p-6 sm:p-10 w-full overflow-x-hidden">
         
+        {/* Render Page Settings Tab if active */}
+        {activeTab === 'pageSettings' && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-brand-navy">Page Content Control Panel</h2>
+                <p className="text-xs text-brand-slate">Customize dynamic sections on the Home and About pages.</p>
+              </div>
+            </div>
+
+            {pageContentError && (
+              <div className="bg-red-50 text-red-700 text-xs p-3 rounded-xl border border-red-200 flex items-center gap-2">
+                <AlertCircle className="w-4.5 h-4.5 flex-shrink-0" />
+                <span>{pageContentError}</span>
+              </div>
+            )}
+
+            {pageContentSuccess && (
+              <div className="bg-emerald-50 text-emerald-800 text-xs p-3 rounded-xl border border-emerald-200 flex items-center gap-2">
+                <Check className="w-4.5 h-4.5 flex-shrink-0 text-emerald-600" />
+                <span>Page content configurations saved successfully!</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSavePageSettings} className="space-y-8 pb-20">
+              
+              {/* SECTION: HOME HERO */}
+              <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm space-y-4">
+                <div className="border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-lg bg-brand-blue/5 text-brand-blue flex items-center justify-center font-bold text-xs">H1</div>
+                  <h3 className="font-bold text-brand-navy text-sm">Home Page Hero Section</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="md:col-span-2">
+                    <ImageInputOptions 
+                      label="Hero Background Image (Preferred: 1920x1080)" 
+                      imageUrl={pageContent.homeHeroBgImage}
+                      onChangeUrl={(val) => setPageContent({...pageContent, homeHeroBgImage: val})}
+                      onFileSelected={(base64) => setPageContent({...pageContent, homeHeroBgImage: base64})}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Hero Main Heading</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.homeHeroHeading || ''}
+                      onChange={(e) => setPageContent({...pageContent, homeHeroHeading: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Hero Paragraph</label>
+                    <textarea 
+                      rows="2"
+                      required
+                      value={pageContent.homeHeroParagraph || ''}
+                      onChange={(e) => setPageContent({...pageContent, homeHeroParagraph: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION: HOME ABOUT & STATS */}
+              <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm space-y-4">
+                <div className="border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-lg bg-brand-blue/5 text-brand-blue flex items-center justify-center font-bold text-xs">H2</div>
+                  <h3 className="font-bold text-brand-navy text-sm">Home Page About Section</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Section Heading</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.homeAboutHeading || ''}
+                      onChange={(e) => setPageContent({...pageContent, homeAboutHeading: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Section Paragraph</label>
+                    <textarea 
+                      rows="3"
+                      required
+                      value={pageContent.homeAboutParagraph || ''}
+                      onChange={(e) => setPageContent({...pageContent, homeAboutParagraph: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    ></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Countries Served Stat</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.homeStatsCountries || ''}
+                      onChange={(e) => setPageContent({...pageContent, homeStatsCountries: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Projects Shipped Stat</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.homeStatsProjects || ''}
+                      onChange={(e) => setPageContent({...pageContent, homeStatsProjects: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Precision Stat</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.homeStatsPrecision || ''}
+                      onChange={(e) => setPageContent({...pageContent, homeStatsPrecision: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION: ABOUT HERO & NARRATIVE */}
+              <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm space-y-4">
+                <div className="border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-lg bg-brand-blue/5 text-brand-blue flex items-center justify-center font-bold text-xs">A1</div>
+                  <h3 className="font-bold text-brand-navy text-sm">About Page Main Content</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Hero Main Heading</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.aboutHeroHeading || ''}
+                      onChange={(e) => setPageContent({...pageContent, aboutHeroHeading: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Hero Sub-paragraph</label>
+                    <textarea 
+                      rows="2"
+                      required
+                      value={pageContent.aboutHeroParagraph || ''}
+                      onChange={(e) => setPageContent({...pageContent, aboutHeroParagraph: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    ></textarea>
+                  </div>
+                  <div className="md:col-span-3 pt-2 border-t border-slate-50">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Narrative Heading</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.aboutNarrativeHeading || ''}
+                      onChange={(e) => setPageContent({...pageContent, aboutNarrativeHeading: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Narrative Paragraph 1</label>
+                    <textarea 
+                      rows="3"
+                      required
+                      value={pageContent.aboutNarrativeParagraph1 || ''}
+                      onChange={(e) => setPageContent({...pageContent, aboutNarrativeParagraph1: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    ></textarea>
+                  </div>
+                  <div className="md:col-span-3">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Narrative Paragraph 2</label>
+                    <textarea 
+                      rows="3"
+                      required
+                      value={pageContent.aboutNarrativeParagraph2 || ''}
+                      onChange={(e) => setPageContent({...pageContent, aboutNarrativeParagraph2: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    ></textarea>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Countries Served Stat</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.aboutStatsCountries || ''}
+                      onChange={(e) => setPageContent({...pageContent, aboutStatsCountries: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Clients Worldwide Stat</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.aboutStatsClients || ''}
+                      onChange={(e) => setPageContent({...pageContent, aboutStatsClients: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Telemetry Stat</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.aboutStatsTelemetry || ''}
+                      onChange={(e) => setPageContent({...pageContent, aboutStatsTelemetry: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION: ABOUT CORE VALUES LIST MANAGER */}
+              <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm space-y-4">
+                <div className="border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-lg bg-brand-blue/5 text-brand-blue flex items-center justify-center font-bold text-xs">A2</div>
+                  <h3 className="font-bold text-brand-navy text-sm">About Page Core Values Manager</h3>
+                </div>
+                
+                {/* List current values */}
+                <div className="space-y-3">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy font-mono">Current Core Values</label>
+                  {pageContent.aboutValues && pageContent.aboutValues.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {pageContent.aboutValues.map((val, idx) => {
+                        const IconComponent = iconMap[val.icon] || HelpCircle;
+                        return (
+                          <div key={idx} className="border border-slate-200/60 p-4 rounded-xl flex items-start justify-between gap-4 bg-slate-50/40">
+                            <div className="flex gap-3">
+                              <div className="h-8 w-8 rounded-lg bg-blue-50 text-brand-blue flex items-center justify-center border border-blue-100 flex-shrink-0">
+                                <IconComponent className="w-4 h-4" />
+                              </div>
+                              <div>
+                                <h4 className="text-xs font-bold text-brand-navy">{val.title}</h4>
+                                <p className="text-[10px] text-brand-slate leading-relaxed mt-0.5">{val.description}</p>
+                                <span className="inline-block text-[9px] font-bold font-mono text-brand-blue uppercase bg-blue-50/30 px-1 py-0.5 rounded border border-blue-100/40 mt-1.5">Icon: {val.icon}</span>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteAboutValue(idx)}
+                              className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                              title="Delete Core Value"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-brand-slate italic p-4 border border-dashed rounded-xl text-center bg-slate-50/30">No core values configured. Add one below.</div>
+                  )}
+                </div>
+
+                {/* Add new value card */}
+                <div className="border border-slate-100 p-4 rounded-xl space-y-4 bg-slate-50/20">
+                  <h4 className="text-xs font-bold text-brand-navy font-mono uppercase tracking-wider">Add New Core Value</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-navy mb-1 font-mono">Choose Icon</label>
+                      <select 
+                        value={newAboutValue.icon}
+                        onChange={(e) => setNewAboutValue({...newAboutValue, icon: e.target.value})}
+                        className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-xs bg-white"
+                      >
+                        {Object.keys(iconMap).map(iconName => (
+                          <option key={iconName} value={iconName}>{iconName}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-navy mb-1 font-mono">Value Title</label>
+                      <input 
+                        type="text"
+                        value={newAboutValue.title}
+                        onChange={(e) => setNewAboutValue({...newAboutValue, title: e.target.value})}
+                        placeholder="e.g. Extreme Optimization"
+                        className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-xs"
+                      />
+                    </div>
+                    <div className="md:col-span-3">
+                      <label className="block text-[10px] font-bold uppercase tracking-wider text-brand-navy mb-1 font-mono">Value Description</label>
+                      <input 
+                        type="text"
+                        value={newAboutValue.description}
+                        onChange={(e) => setNewAboutValue({...newAboutValue, description: e.target.value})}
+                        placeholder="e.g. We compress logic paths and database lookups to deliver sub-second rendering speeds."
+                        className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-xs"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={handleAddAboutValue}
+                      className="inline-flex items-center gap-1.5 bg-brand-navy hover:bg-slate-800 text-white text-xs font-bold px-4.5 py-2 rounded-xl transition-colors shadow-sm"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Add to List
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* SECTION: VISION STATEMENT */}
+              <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm space-y-4">
+                <div className="border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-lg bg-brand-blue/5 text-brand-blue flex items-center justify-center font-bold text-xs">A3</div>
+                  <h3 className="font-bold text-brand-navy text-sm">About Page Vision Quote</h3>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Vision Quote Statement</label>
+                  <textarea 
+                    rows="2"
+                    required
+                    value={pageContent.aboutVisionStatement || ''}
+                    onChange={(e) => setPageContent({...pageContent, aboutVisionStatement: e.target.value})}
+                    className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm font-serif italic"
+                  ></textarea>
+                </div>
+              </div>
+
+              {/* SUBMIT BUTTON FOOTER BAR */}
+              <div className="bg-slate-50 border border-slate-200/60 p-4 rounded-2xl flex items-center justify-between gap-4">
+                <div className="text-xs text-brand-slate">Double check details before applying. Changes deploy instantly to public pages.</div>
+                <button
+                  type="submit"
+                  className="bg-brand-blue hover:bg-blue-600 text-white text-xs font-bold px-6 py-3 rounded-xl shadow-md transition-colors flex items-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  Save Page Content
+                </button>
+              </div>
+
+            </form>
+          </div>
+        )}
+
         {/* Render Blogs Tab if active */}
         {activeTab === 'blogs' && (
           <div className="space-y-6">

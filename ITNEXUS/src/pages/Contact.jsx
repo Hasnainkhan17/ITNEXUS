@@ -1,8 +1,14 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, HelpCircle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import useSeo from '../utils/useSeo';
 
 export default function Contact() {
+  useSeo({
+    title: 'Contact',
+    description: 'Start your software transformation. Send project inquiries, scope specifications, or request consultations.'
+  });
+
   const [formData, setFormData] = useState({
     clientName: '',
     clientEmail: '',

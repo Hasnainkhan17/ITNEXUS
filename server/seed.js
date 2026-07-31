@@ -13,6 +13,7 @@ const Client = require('./models/Client');
 const Inquiry = require('./models/Inquiry');
 const Service = require('./models/Service');
 const Blog = require('./models/Blog');
+const PageContent = require('./models/PageContent');
 
 const mockProjects = [
   {
@@ -257,6 +258,7 @@ const seedDB = async () => {
     await Client.deleteMany({});
     await Service.deleteMany({});
     await Blog.deleteMany({});
+    await PageContent.deleteMany({});
     console.log('Existing collections cleared.');
 
     // Seed Admin User
@@ -298,6 +300,12 @@ const seedDB = async () => {
     console.log('Seeding blogs...');
     await Blog.insertMany(mockBlogs);
     console.log(`${mockBlogs.length} Blogs seeded successfully.`);
+
+    // Seed Page Contents
+    console.log('Seeding page contents...');
+    const defaultPageContent = new PageContent({});
+    await defaultPageContent.save();
+    console.log('Page contents seeded successfully.');
 
     console.log('--- SEEDING COMPLETE ---');
     process.exit(0);

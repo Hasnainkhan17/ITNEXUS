@@ -3,8 +3,14 @@ import { ShieldAlert, Award } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
 import LinkedinIcon from '../components/LinkedinIcon';
+import useSeo from '../utils/useSeo';
 
 export default function Team() {
+  useSeo({
+    title: 'Team',
+    description: 'Meet the architects, principal engineers, and designers building enterprise solutions at ITNEXUS.'
+  });
+
   const [team, setTeam] = useState([]);
 
   useEffect(() => {

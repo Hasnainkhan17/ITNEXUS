@@ -3,8 +3,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ArrowRight, ExternalLink, Calendar, Tag, ShieldCheck } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
+import useSeo from '../utils/useSeo';
 
 export default function Projects() {
+  useSeo({
+    title: 'Projects',
+    description: 'Explore our portfolio of shipped digital products, real-time vital telemetry platforms, and cloud migrations.'
+  });
+
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedProject, setSelectedProject] = useState(null);
   const [projects, setProjects] = useState([]);

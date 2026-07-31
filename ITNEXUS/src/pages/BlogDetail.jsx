@@ -3,12 +3,19 @@ import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, Clock, User, ShieldCheck, Layers, Newspaper } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
+import useSeo from '../utils/useSeo';
 
 export default function BlogDetail() {
   const { slug } = useParams();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  useSeo({
+    title: blog ? blog.title : 'Blog Article',
+    description: blog ? blog.shortDescription : 'Read technical article from ITNEXUS developers.',
+    keywords: blog ? blog.category : null
+  });
 
   useEffect(() => {
     setLoading(true);

@@ -2,8 +2,15 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, Lock, Mail, AlertTriangle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
+import useSeo from '../utils/useSeo';
 
 export default function AdminLogin() {
+  useSeo({
+    title: 'Admin Login',
+    description: 'Authorized access portal for ITNEXUS administrative controls.',
+    ogType: 'private'
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -44,7 +51,7 @@ export default function AdminLogin() {
   return (
     <div className="w-full min-h-[80vh] flex items-center justify-center px-6">
       <div className="w-full max-w-md bg-white border border-slate-200/60 rounded-3xl p-8 sm:p-10 shadow-xl space-y-6">
-        
+
         {/* Brand Icon */}
         <div className="text-center space-y-3">
           <div className="h-12 w-12 rounded-xl bg-brand-blue/5 text-brand-blue flex items-center justify-center mx-auto border border-brand-blue/10">
@@ -100,12 +107,6 @@ export default function AdminLogin() {
             {loading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
-
-        <div className="text-center">
-          <p className="text-[10px] text-brand-slate font-mono">
-            JWT session authorization required for CRUD endpoints.
-          </p>
-        </div>
       </div>
     </div>
   );

@@ -33,7 +33,8 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Routes declarations
 app.use('/api/auth', require('./routes/auth'));
@@ -43,6 +44,7 @@ app.use('/api/clients', require('./routes/clients'));
 app.use('/api/inquiries', require('./routes/inquiries'));
 app.use('/api/services', require('./routes/services'));
 app.use('/api/blogs', require('./routes/blogs'));
+app.use('/api/page-contents', require('./routes/pageContents'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

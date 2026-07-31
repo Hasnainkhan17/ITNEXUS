@@ -4,8 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Clock, ArrowRight, BookOpen, Layers, Newspaper } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
+import useSeo from '../utils/useSeo';
 
 export default function BlogHub() {
+  useSeo({
+    title: 'Blog',
+    description: 'Technical deep-dives, scalability tutorials, Express API optimization strategies, and cybersecurity guidelines.'
+  });
+
   const [blogs, setBlogs] = useState([]);
   const [activeType, setActiveType] = useState('All');
 
