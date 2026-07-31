@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Send, HelpCircle } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import useSeo from '../utils/useSeo';
@@ -17,6 +17,14 @@ export default function Contact() {
     message: ''
   });
   const [submitStatus, setSubmitStatus] = useState(null);
+  const [pageContent, setPageContent] = useState(null);
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/page-contents`)
+      .then(res => res.json())
+      .then(data => setPageContent(data))
+      .catch(err => console.error('Error fetching page content:', err));
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -88,7 +96,9 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-brand-navy">Email Support</h4>
-                  <p className="text-xs font-bold text-brand-blue mt-1">info@itnexus.org</p>
+                  <p className="text-xs font-bold text-brand-blue mt-1">
+                    {pageContent?.contactEmail || 'info@itnexus.org'}
+                  </p>
                   <p className="text-xs text-brand-slate mt-0.5">Checked continuously throughout business hours.</p>
                 </div>
               </div>
@@ -99,7 +109,9 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-brand-navy">Phone Channel</h4>
-                  <p className="text-xs font-bold text-brand-blue mt-1">+92 (300) 123-4567</p>
+                  <p className="text-xs font-bold text-brand-blue mt-1">
+                    {pageContent?.contactPhone || '+92 (300) 123-4567'}
+                  </p>
                   <p className="text-xs text-brand-slate mt-0.5">Available Mon-Fri, 9:00 AM - 6:00 PM PKT.</p>
                 </div>
               </div>
@@ -110,7 +122,9 @@ export default function Contact() {
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-brand-navy">Regional Office</h4>
-                  <p className="text-xs text-brand-slate mt-1 font-semibold">ITNEXUS HQ, Software Park, PK</p>
+                  <p className="text-xs text-brand-slate mt-1 font-semibold">
+                    {pageContent?.contactAddress || 'ITNEXUS HQ, Software Park, PK'}
+                  </p>
                   <p className="text-xs text-brand-slate mt-0.5">Visitor appointments require 24h pre-clearance.</p>
                 </div>
               </div>

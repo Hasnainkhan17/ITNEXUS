@@ -123,7 +123,6 @@ const mockTeam = [
     imageUrl: "itnexus-mark-color-512px.png",
     shortBio: "Over 10 years building Kubernetes pipelines for high-traffic apps.", // 66 chars
     fullBio: "Sarah leads our DevOps pipelines. She specializes in AWS Cloud infrastructure, Docker deployments, CI/CD integrations, and robust database backups.",
-    linkedinUrl: "https://linkedin.com/in/sarah-jenkins-devops",
     displayOrder: 1,
     isActive: true
   },
@@ -133,7 +132,6 @@ const mockTeam = [
     imageUrl: "itnexus-mark-color-512px.png",
     shortBio: "Specialist in database normalization, secure JWT APIs, and Node.js.", // 69 chars
     fullBio: "Marcus is responsible for system architectures. He coordinates MERN integrations, designs RESTful endpoints, and coordinates data schemas.",
-    linkedinUrl: "https://linkedin.com/in/marcus-chen-arch",
     displayOrder: 2,
     isActive: true
   },
@@ -143,7 +141,6 @@ const mockTeam = [
     imageUrl: "itnexus-mark-color-512px.png",
     shortBio: "Crafting beautiful Figma mockups and fluid Framer Motion details.", // 67 chars
     fullBio: "Elena brings interface wireframes to life. She focuses on clean grids, user telemetry graphs, brand guidelines, and micro-interactions.",
-    linkedinUrl: "https://linkedin.com/in/elena-rostova-ux",
     displayOrder: 3,
     isActive: true
   }
@@ -264,14 +261,16 @@ const seedDB = async () => {
     // Seed Admin User
     const adminUsername = process.env.ADMIN_USERNAME || 'admin';
     const adminPassword = process.env.ADMIN_PASSWORD || 'adminpassword';
-    console.log(`Seeding Admin User: ${adminUsername}...`);
+    const adminEmail = process.env.ADMIN_EMAIL || 'info@itnexus.org';
+    console.log(`Seeding Admin User: ${adminUsername} (${adminEmail})...`);
     
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(adminPassword, salt);
     
     const newAdmin = new User({
       username: adminUsername,
-      password: hashedPassword
+      password: hashedPassword,
+      email: adminEmail
     });
     await newAdmin.save();
     console.log('Admin User seeded successfully.');

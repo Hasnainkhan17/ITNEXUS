@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ShieldAlert, Award } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
-import LinkedinIcon from '../components/LinkedinIcon';
 import useSeo from '../utils/useSeo';
 
 export default function Team() {
@@ -62,21 +61,6 @@ export default function Team() {
                     <p className="text-xs font-semibold text-brand-blue uppercase tracking-wider mt-1">{member.role}</p>
                   </div>
                   
-                  {/* Social Buttons */}
-                  {member.linkedinUrl && (
-                    <div className="flex justify-center lg:justify-start gap-3">
-                      <a 
-                        href={member.linkedinUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="p-2.5 rounded-lg bg-white border border-slate-200 text-brand-slate hover:text-brand-blue transition-colors flex items-center gap-1.5 text-xs font-bold font-mono"
-                        title="LinkedIn Profile"
-                      >
-                        <LinkedinIcon className="w-4 h-4 text-brand-blue" />
-                        <span>LinkedIn</span>
-                      </a>
-                    </div>
-                  )}
                 </div>
 
                 {/* Right Column: Bio */}

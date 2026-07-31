@@ -15,7 +15,6 @@ const teamSchema = new mongoose.Schema({
     }
   },
   fullBio: { type: String },
-  linkedinUrl: { type: String, default: '' },
   displayOrder: { type: Number, default: 0 },
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });

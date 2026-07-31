@@ -49,7 +49,10 @@ router.put('/', auth, async (req, res) => {
       'aboutStatsClients',
       'aboutStatsTelemetry',
       'aboutValues',
-      'aboutVisionStatement'
+      'aboutVisionStatement',
+      'contactEmail',
+      'contactPhone',
+      'contactAddress'
     ];
 
     fields.forEach(field => {

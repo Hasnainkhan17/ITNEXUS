@@ -24,9 +24,9 @@ export default function Navbar() {
     return (
         <header className=" fixed top-0 left-0 right-0 z-50 flex flex-col items-center pt-0 transition-all duration-300">
             <nav
-                className={` rounded-full transition-all duration-500 ease-in-out flex items-center justify-between w-full ${isScrolled
-                    ? 'max-w-3xl bg-white/85 backdrop-blur-md border border-slate-200/80 shadow-lg shadow-slate-200/50 rounded-full px-6 py-3 mt-4 mx-4'
-                    : 'max-w-[1200px] bg-white/80 backdrop-blur-md border-x border-b border-slate-200/60 px-8 py-4 rounded-full mt-2'
+                className={` transition-all duration-500 ease-in-out flex items-center justify-between w-full ${isScrolled
+                    ? 'max-w-3xl bg-transparent md:bg-white/85 md:backdrop-blur-md border-none md:border md:border-slate-200/80 shadow-none md:shadow-lg md:shadow-slate-200/50 rounded-full px-6 py-3 mt-4 mx-4'
+                    : 'max-w-[1200px] bg-transparent md:bg-white/80 md:backdrop-blur-md border-none md:border-x md:border-b md:border-slate-200/60 px-6 py-3 md:px-8 md:py-4 rounded-full mt-2'
                     }`}
             >
                 {/* Brand Logo */}
@@ -105,15 +105,15 @@ export default function Navbar() {
                 {/* Mobile Hamburger Toggle */}
                 <button
                     onClick={() => setIsOpen(!isOpen)}
-                    className="flex md:hidden text-brand-navy focus:outline-none p-1.5 hover:bg-slate-100/50 rounded-lg transition-colors"
+                    className="flex md:hidden text-brand-navy focus:outline-none p-2.5 bg-white/90 backdrop-blur-sm border border-slate-200/80 rounded-full shadow-md hover:bg-white transition-all hover:scale-105 active:scale-95"
                     aria-label="Toggle Menu"
                 >
                     {isOpen ? (
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     ) : (
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     )}

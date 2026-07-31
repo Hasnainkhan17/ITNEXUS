@@ -1,9 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { footerCategories } from '../data/mockdata';
 import logoUrl from '../assets/itnexus-mark-reversed-256px.png';
+import { API_BASE_URL } from '../config';
 
 export default function Footer() {
+    const [pageContent, setPageContent] = useState(null);
+
+    useEffect(() => {
+        fetch(`${API_BASE_URL}/page-contents`)
+            .then(res => res.json())
+            .then(data => setPageContent(data))
+            .catch(err => console.error('Error fetching footer content:', err));
+    }, []);
+
+    // Dynamically update contact info in footer categories if loaded
+    const dynamicCategories = footerCategories.map(col => {
+        if (col.title === 'Contact Info' && pageContent) {
+            return {
+                ...col,
+                links: [
+                    { 
+                        label: `📧 ${pageContent.contactEmail || 'info@itnexus.org'}`, 
+                        url: `mailto:${pageContent.contactEmail || 'info@itnexus.org'}` 
+                    },
+                    { 
+                        label: `📞 ${pageContent.contactPhone || '+92 (300) 123-4567'}`, 
+                        url: `tel:${(pageContent.contactPhone || '+92 (300) 123-4567').replace(/[^+\d]/g, '')}` 
+                    },
+                    { 
+                        label: `📍 ${pageContent.contactAddress || 'Regional Office, PK'}`, 
+                        url: '/contact' 
+                    }
+                ]
+            };
+        }
+        return col;
+    });
 
     return (
         <footer className="bg-slate-50 pt-16 pb-12 w-full mt-auto">
@@ -21,7 +54,7 @@ export default function Footer() {
                     </div>
 
                     {/* Dynamic Footer Stack Columns */}
-                    {footerCategories.map((col, idx) => (
+                    {dynamicCategories.map((col, idx) => (
                         <div key={idx} className="space-y-4">
                             {/* Category Tag Badge */}
                             <div className="inline-block bg-brand-blue/5 text-brand-blue text-xs font-semibold px-3 py-1 rounded-md tracking-wider uppercase">
@@ -56,7 +89,7 @@ export default function Footer() {
                 </div>
 
                 <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-                    <p>© 2026 Next Gen Solutions. All rights reserved.</p>
+                    <p>© 2026 ITNEXUS. All rights reserved.</p>
                     <div className="flex gap-6 items-center">
                         <a href="#" className="hover:text-slate-600 transition-colors">Privacy Policy</a>
                         <a href="#" className="hover:text-slate-600 transition-colors">Terms of Service</a>

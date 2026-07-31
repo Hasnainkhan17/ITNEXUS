@@ -58,7 +58,12 @@ const pageContentSchema = new mongoose.Schema({
     ]
   },
   
-  aboutVisionStatement: { type: String, default: '"Software engineering is not about typing code, it\'s about solving enterprise challenges with absolute reliability."' }
+  aboutVisionStatement: { type: String, default: '"Software engineering is not about typing code, it\'s about solving enterprise challenges with absolute reliability."' },
+  
+  // Dynamic Contact Info
+  contactEmail: { type: String, default: 'info@itnexus.org' },
+  contactPhone: { type: String, default: '+92 (300) 123-4567' },
+  contactAddress: { type: String, default: 'ITNEXUS HQ, Software Park, PK' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('PageContent', pageContentSchema);

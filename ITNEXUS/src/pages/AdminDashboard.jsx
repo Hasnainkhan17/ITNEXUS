@@ -124,6 +124,14 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('inquiries');
   const [inquiries, setInquiries] = useState([]);
 
+  // Admin Settings states
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState('');
+  const [adminSettingsError, setAdminSettingsError] = useState('');
+  const [adminSettingsSuccess, setAdminSettingsSuccess] = useState('');
+  const [adminSettingsLoading, setAdminSettingsLoading] = useState(false);
+
   // Load datasets into state
   const [projects, setProjects] = useState([]);
   const [team, setTeam] = useState([]);
@@ -150,7 +158,10 @@ export default function AdminDashboard() {
     aboutStatsClients: '',
     aboutStatsTelemetry: '',
     aboutValues: [],
-    aboutVisionStatement: ''
+    aboutVisionStatement: '',
+    contactEmail: '',
+    contactPhone: '',
+    contactAddress: ''
   });
   const [pageContentError, setPageContentError] = useState('');
   const [pageContentSuccess, setPageContentSuccess] = useState(false);
@@ -196,8 +207,7 @@ export default function AdminDashboard() {
     name: '',
     role: '',
     shortBio: '',
-    imageUrl: 'itnexus-mark-color-512px.png',
-    linkedinUrl: ''
+    imageUrl: 'itnexus-mark-color-512px.png'
   });
 
   const [showAddClientModal, setShowAddClientModal] = useState(false);
@@ -240,6 +250,8 @@ export default function AdminDashboard() {
         navigate('/admin/login');
         return;
       }
+      const userData = await verifyRes.json();
+      setAdminUsername(userData.username || '');
 
       // Fetch projects
       const projRes = await fetch(`${API_BASE_URL}/projects`, { headers });
@@ -288,6 +300,54 @@ export default function AdminDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     navigate('/admin/login');
+  };
+
+  const handleUpdateAdminSettings = async (e) => {
+    e.preventDefault();
+    setAdminSettingsError('');
+    setAdminSettingsSuccess('');
+
+    if (adminPassword && adminPassword !== adminConfirmPassword) {
+      setAdminSettingsError('New passwords do not match.');
+      return;
+    }
+
+    if (adminPassword && adminPassword.length < 6) {
+      setAdminSettingsError('New password must be at least 6 characters long.');
+      return;
+    }
+
+    setAdminSettingsLoading(true);
+    const token = localStorage.getItem('adminToken');
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/update-account`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          newUsername: adminUsername,
+          newPassword: adminPassword || undefined
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setAdminSettingsSuccess('Account credentials updated successfully.');
+        setAdminPassword('');
+        setAdminConfirmPassword('');
+      } else {
+        setAdminSettingsError(data.message || 'Failed to update credentials.');
+      }
+    } catch (err) {
+      console.error(err);
+      setAdminSettingsError('Failed to connect to backend server.');
+    } finally {
+      setAdminSettingsLoading(false);
+    }
   };
 
   // 1. Inquiry Operations
@@ -498,8 +558,7 @@ export default function AdminDashboard() {
           name: '',
           role: '',
           shortBio: '',
-          imageUrl: 'itnexus-mark-color-512px.png',
-          linkedinUrl: ''
+          imageUrl: 'itnexus-mark-color-512px.png'
         });
         setShowAddTeamModal(false);
       } else {
@@ -879,8 +938,24 @@ export default function AdminDashboard() {
           </nav>
         </div>
 
-        {/* Log Out button pinned to the bottom */}
-        <div className="pt-6 border-t border-slate-850 mt-auto">
+        {/* Settings and Log Out button pinned to the bottom */}
+        <div className="pt-6 border-t border-slate-850 mt-auto space-y-2">
+          <button 
+            onClick={() => {
+              setActiveTab('adminSettings');
+              setAdminSettingsError('');
+              setAdminSettingsSuccess('');
+            }}
+            className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-colors ${
+              activeTab === 'adminSettings' 
+                ? 'bg-brand-blue text-white shadow-md shadow-brand-blue/15' 
+                : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+            }`}
+          >
+            <Lock className="w-4 h-4" />
+            <span>Admin Settings</span>
+          </button>
+
           <button 
             onClick={handleLogout}
             className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-red-700 text-xs font-bold py-3 rounded-xl border border-slate-700 transition-colors text-white hover:border-red-650"
@@ -1216,6 +1291,46 @@ export default function AdminDashboard() {
                     onChange={(e) => setPageContent({...pageContent, aboutVisionStatement: e.target.value})}
                     className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm font-serif italic"
                   ></textarea>
+                </div>
+              </div>
+
+              {/* SECTION: GLOBAL CONTACT INFO */}
+              <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm space-y-4">
+                <div className="border-b border-slate-100 pb-3 flex items-center gap-2">
+                  <div className="h-6 w-6 rounded-lg bg-brand-blue/5 text-brand-blue flex items-center justify-center font-bold text-xs">C1</div>
+                  <h3 className="font-bold text-brand-navy text-sm">Global Contact Channels</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Support Email</label>
+                    <input 
+                      type="email" 
+                      required
+                      value={pageContent.contactEmail || ''}
+                      onChange={(e) => setPageContent({...pageContent, contactEmail: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Phone Number</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.contactPhone || ''}
+                      onChange={(e) => setPageContent({...pageContent, contactPhone: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Office Address / Location</label>
+                    <input 
+                      type="text" 
+                      required
+                      value={pageContent.contactAddress || ''}
+                      onChange={(e) => setPageContent({...pageContent, contactAddress: e.target.value})}
+                      className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1597,6 +1712,83 @@ export default function AdminDashboard() {
           </div>
         )}
 
+        {/* ADMIN SETTINGS TAB */}
+        {activeTab === 'adminSettings' && (
+          <div className="space-y-6 max-w-lg">
+            <div>
+              <h2 className="text-xl font-bold text-brand-navy">Admin Account Settings</h2>
+              <p className="text-xs text-brand-slate">Update your administrator username and password securely.</p>
+            </div>
+
+            {adminSettingsError && (
+              <div className="bg-amber-50 text-amber-800 text-xs p-4 rounded-xl border border-amber-200 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <span>{adminSettingsError}</span>
+              </div>
+            )}
+
+            {adminSettingsSuccess && (
+              <div className="bg-green-50 text-green-800 text-xs p-4 rounded-xl border border-green-200 flex items-start gap-2.5">
+                <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                <span>{adminSettingsSuccess}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleUpdateAdminSettings} className="bg-white border border-slate-200/60 p-6 sm:p-8 rounded-3xl shadow-sm space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">New Username</label>
+                <div className="relative">
+                  <ShieldCheck className="absolute left-3.5 top-3.5 w-4 h-4 text-brand-slate/40" />
+                  <input
+                    type="text"
+                    required
+                    value={adminUsername}
+                    onChange={(e) => setAdminUsername(e.target.value)}
+                    placeholder="Enter new username"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">New Password (leave blank to keep current)</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-brand-slate/40" />
+                  <input
+                    type="password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue text-sm"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1.5 font-mono">Confirm New Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-brand-slate/40" />
+                  <input
+                    type="password"
+                    value={adminConfirmPassword}
+                    onChange={(e) => setAdminConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-blue/20 focus:border-brand-blue text-sm"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={adminSettingsLoading}
+                className="w-full bg-brand-navy hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-md transition-all text-sm mt-4"
+              >
+                {adminSettingsLoading ? 'Updating Account...' : 'Update Settings'}
+              </button>
+            </form>
+          </div>
+        )}
+
       </main>
 
       {/* 5. ADD PROJECT MODAL */}
@@ -1753,26 +1945,13 @@ export default function AdminDashboard() {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <ImageInputOptions 
-                    label="Profile Photo" 
-                    imageUrl={newMember.imageUrl}
-                    onChangeUrl={(val) => setNewMember({...newMember, imageUrl: val})}
-                    onFileSelected={(base64) => setNewMember({...newMember, imageUrl: base64})}
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-brand-navy mb-1 font-mono">LinkedIn URL</label>
-                  <input 
-                    type="text" 
-                    required
-                    value={newMember.linkedinUrl}
-                    onChange={(e) => setNewMember({...newMember, linkedinUrl: e.target.value})}
-                    placeholder="https://linkedin.com/in/..."
-                    className="w-full px-3 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-blue/20 text-sm"
-                  />
-                </div>
+              <div>
+                <ImageInputOptions 
+                  label="Profile Photo" 
+                  imageUrl={newMember.imageUrl}
+                  onChangeUrl={(val) => setNewMember({...newMember, imageUrl: val})}
+                  onFileSelected={(base64) => setNewMember({...newMember, imageUrl: base64})}
+                />
               </div>
               <div>
                 <div className="flex justify-between items-center mb-1">

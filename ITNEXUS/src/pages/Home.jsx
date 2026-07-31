@@ -6,8 +6,6 @@ import logoReversed from '../assets/itnexus-logo-horizontal-reversed@2x.png';
 import heroBg from '../assets/hero.png';
 import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
-import LinkedinIcon from '../components/LinkedinIcon';
-
 import useSeo from '../utils/useSeo';
 
 // Map icon strings to Lucide icon components
@@ -30,6 +28,29 @@ export default function Home() {
   const [services, setServices] = useState([]);
   const [pageContent, setPageContent] = useState(null);
 
+  // Responsive slider states
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+  const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const itemsPerView = windowWidth < 768 ? 1 : (team.length > 0 ? Math.min(team.length, 4) : 4);
+  const canSlide = team.length > itemsPerView;
+  const maxIndex = canSlide ? team.length - itemsPerView : 0;
+
+  // Auto-slide effect for Team (only on mobile)
+  useEffect(() => {
+    if (!canSlide || team.length === 0 || windowWidth >= 768) return;
+    const interval = setInterval(() => {
+      setCurrentTeamIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [team, canSlide, maxIndex, windowWidth]);
+
   useEffect(() => {
     // Fetch featured projects
     fetch(`${API_BASE_URL}/projects?featured=true`)
@@ -40,7 +61,7 @@ export default function Home() {
     // Fetch active team members
     fetch(`${API_BASE_URL}/team`)
       .then(res => res.json())
-      .then(data => setTeam(data.slice(0, 3)))
+      .then(data => setTeam(data))
       .catch(err => console.error('Error fetching team:', err));
 
     // Fetch active clients
@@ -94,7 +115,7 @@ export default function Home() {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
+          backgroundAttachment: windowWidth < 768 ? 'scroll' : 'fixed'
         }}
       >
         {/* Backdrop overlay for maximum contrast */}
@@ -246,17 +267,22 @@ export default function Home() {
           <p className="text-center text-xs font-bold tracking-wider text-brand-slate/60 uppercase mb-8 font-mono">
             Trusted by Teams Worldwide
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-70 grayscale hover:grayscale-0 transition-all duration-300">
-            {clients.map((client) => (
-              <img
-                key={client._id}
-                src={resolveAssetUrl(client.logoUrl)}
-                alt={client.clientName}
-                title={client.clientName}
-                className="h-7 object-contain max-w-[120px]"
-              />
-            ))}
-          </div>
+          {clients.length > 0 && (
+            <div className="overflow-hidden flex w-full">
+              <div className="animate-marquee flex gap-8 py-4">
+                {[...clients, ...clients].map((client, idx) => (
+                  <div key={idx} className="w-24 h-24 rounded-full bg-white border border-slate-100 flex items-center justify-center p-4 shadow-sm flex-shrink-0">
+                    <img
+                      src={resolveAssetUrl(client.logoUrl)}
+                      alt={client.clientName}
+                      title={client.clientName}
+                      className="max-h-12 max-w-full object-contain filter grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -346,41 +372,72 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {team.map((member) => (
-            <div key={member._id} className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all text-center flex flex-col justify-between h-full overflow-hidden">
-              <div>
-                <div className="w-full h-50 bg-slate-100 relative overflow-hidden">
-                  <img
-                    src={resolveAssetUrl(member.imageUrl)}
-                    alt={member.name}
-                    className="w-full h-full object-cover"
-                  />
+        {windowWidth < 768 ? (
+          /* Mobile Slider */
+          <div className="overflow-hidden w-full relative">
+            <div 
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{
+                transform: `translateX(-${currentTeamIndex * 100}%)`
+              }}
+            >
+              {team.map((member) => (
+                <div 
+                  key={member._id} 
+                  className="px-4 flex-shrink-0 w-full"
+                >
+                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all text-center flex flex-col justify-between h-full overflow-hidden">
+                    <div>
+                      <div className="w-full h-50 bg-slate-100 relative overflow-hidden">
+                        <img
+                          src={resolveAssetUrl(member.imageUrl)}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="p-6 pb-6">
+                        <h3 className="text-lg font-bold text-brand-navy mb-1">{member.name}</h3>
+                        <p className="text-xs font-semibold text-brand-blue mb-3 tracking-wider uppercase">{member.role}</p>
+                        <p className="text-xs text-brand-slate leading-relaxed font-body max-w-xs mx-auto">
+                          {member.shortBio}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-6 pb-2">
-                  <h3 className="text-lg font-bold text-brand-navy mb-1">{member.name}</h3>
-                  <p className="text-xs font-semibold text-brand-blue mb-3 tracking-wider uppercase">{member.role}</p>
-                  <p className="text-xs text-brand-slate leading-relaxed font-body max-w-xs mx-auto">
-                    {member.shortBio}
-                  </p>
+              ))}
+            </div>
+          </div>
+        ) : (
+          /* Desktop Grid (No sliding, static display) */
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {team.map((member) => (
+              <div 
+                key={member._id} 
+                className="w-full"
+              >
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all text-center flex flex-col justify-between h-full overflow-hidden">
+                  <div>
+                    <div className="w-full h-50 bg-slate-100 relative overflow-hidden">
+                      <img
+                        src={resolveAssetUrl(member.imageUrl)}
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="p-6 pb-6">
+                      <h3 className="text-lg font-bold text-brand-navy mb-1">{member.name}</h3>
+                      <p className="text-xs font-semibold text-brand-blue mb-3 tracking-wider uppercase">{member.role}</p>
+                      <p className="text-xs text-brand-slate leading-relaxed font-body max-w-xs mx-auto">
+                        {member.shortBio}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
-              {member.linkedinUrl && (
-                <div className="pb-6 pt-2">
-                  <a
-                    href={member.linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center p-2 rounded-full bg-slate-50 border border-slate-200 text-brand-slate hover:text-brand-blue transition-colors mx-auto"
-                    title="LinkedIn Profile"
-                  >
-                    <LinkedinIcon className="w-4 h-4" />
-                  </a>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
