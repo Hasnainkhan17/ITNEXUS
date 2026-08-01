@@ -48,7 +48,13 @@ app.use('/api/page-contents', require('./routes/pageContents'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'ITNEXUS API is healthy' });
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'ITNEXUS API is healthy',
+    smtpConfigured: !!(process.env.EMAIL_HOST && process.env.EMAIL_USER && process.env.EMAIL_PASS),
+    emailUser: process.env.EMAIL_USER || 'Not set',
+    envLoadedKeys: Object.keys(process.env).filter(k => k.includes('EMAIL') || k.includes('MONGO') || k.includes('JWT'))
+  });
 });
 
 // Return JSON 404 for unknown /api/* routes
