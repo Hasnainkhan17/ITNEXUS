@@ -30,7 +30,11 @@ import {
   Smile,
   MessageSquare,
   Terminal,
-  HelpCircle
+  HelpCircle,
+  LayoutDashboard,
+  TrendingUp,
+  BarChart3,
+  Activity
 } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import { resolveAssetUrl } from '../utils/assetLoader';
@@ -113,6 +117,427 @@ const ImageInputOptions = ({ label, imageUrl, onChangeUrl, onFileSelected }) => 
   );
 };
 
+const DashboardOverview = ({ inquiries, projects, team, services, blogs, clients, setActiveTab }) => {
+  // Calculations
+  const totalInquiries = inquiries.length;
+  const newInquiriesCount = inquiries.filter(i => i.status === 'New').length;
+  const reviewedInquiriesCount = inquiries.filter(i => i.status === 'Reviewed').length;
+  const respondedInquiriesCount = inquiries.filter(i => i.status === 'Responded').length;
+  
+  const totalProjects = projects.length;
+  const featuredProjectsCount = projects.filter(p => p.isFeaturedOnHome).length;
+  
+  const totalTeam = team.length;
+  const totalServices = services.length;
+  const totalBlogs = blogs.length;
+  const totalClients = clients.length;
+
+  // 1. Group inquiries by month for line graph (last 6 months)
+  const getTrendData = () => {
+    const months = [];
+    const values = [];
+    const now = new Date();
+    
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthLabel = d.toLocaleString('default', { month: 'short' });
+      months.push(monthLabel);
+      
+      const mStart = new Date(d.getFullYear(), d.getMonth(), 1);
+      const mEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+      
+      const count = inquiries.filter(inq => {
+        if (!inq.createdAt) return false;
+        const inqDate = new Date(inq.createdAt);
+        return inqDate >= mStart && inqDate <= mEnd;
+      }).length;
+      values.push(count);
+    }
+    
+    const sum = values.reduce((a, b) => a + b, 0);
+    if (sum === 0 && totalInquiries > 0) {
+      values[values.length - 1] = totalInquiries;
+    }
+    
+    return { labels: months, values };
+  };
+
+  const trendData = getTrendData();
+
+  // 2. Project scopes distribution
+  const scopeDistribution = {};
+  inquiries.forEach(inq => {
+    const scope = inq.projectScope || 'Other';
+    scopeDistribution[scope] = (scopeDistribution[scope] || 0) + 1;
+  });
+
+  const scopesList = Object.entries(scopeDistribution)
+    .map(([name, count]) => ({
+      name,
+      count,
+      percentage: totalInquiries > 0 ? Math.round((count / totalInquiries) * 100) : 0
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  // 3. SVG Line Chart parameters
+  const width = 600;
+  const height = 220;
+  const paddingLeft = 40;
+  const paddingRight = 20;
+  const paddingTop = 20;
+  const paddingBottom = 30;
+  
+  const chartWidth = width - paddingLeft - paddingRight;
+  const chartHeight = height - paddingTop - paddingBottom;
+  
+  const maxVal = Math.max(...trendData.values, 5);
+  
+  const points = trendData.values.map((val, idx) => {
+    const x = paddingLeft + (idx / (trendData.values.length - 1 || 1)) * chartWidth;
+    const y = height - paddingBottom - (val / maxVal) * chartHeight;
+    return { x, y, value: val, label: trendData.labels[idx] };
+  });
+
+  // Cubic Bezier curve path
+  let linePath = '';
+  let areaPath = '';
+  if (points.length > 0) {
+    linePath = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i+1];
+      const cpX1 = p0.x + (p1.x - p0.x) / 2;
+      const cpY1 = p0.y;
+      const cpX2 = p0.x + (p1.x - p0.x) / 2;
+      const cpY2 = p1.y;
+      linePath += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+    }
+    areaPath = `${linePath} L ${points[points.length - 1].x} ${height - paddingBottom} L ${points[0].x} ${height - paddingBottom} Z`;
+  }
+
+  const [hoveredPoint, setHoveredPoint] = useState(null);
+
+  return (
+    <div className="space-y-8 animate-fade-in">
+      {/* Welcome Banner */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-brand-navy to-slate-900 text-white p-6 sm:p-8 rounded-3xl shadow-lg border border-slate-800">
+        <div className="space-y-1.5">
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">ITNEXUS Console Overview</h2>
+          <p className="text-xs text-slate-400 font-mono">Telemetry feed updated real-time • Platform Status: Active</p>
+        </div>
+        <div className="flex gap-3">
+          <div className="flex items-center gap-2 bg-slate-800/80 backdrop-blur-md px-3.5 py-1.5 rounded-xl border border-slate-700/60 text-xs font-mono font-bold">
+            <span className="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>System Online</span>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Cards Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Card 1: Inquiries */}
+        <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group flex flex-col justify-between h-36">
+          <div className="flex items-start justify-between">
+             <div>
+               <p className="text-xs font-bold uppercase tracking-wider text-brand-slate/80 font-mono">Inquiries Received</p>
+               <h3 className="text-3xl font-extrabold text-brand-navy mt-2 group-hover:text-brand-blue transition-colors">{totalInquiries}</h3>
+             </div>
+             <div className="h-10 w-10 rounded-xl bg-blue-50 text-brand-blue flex items-center justify-center border border-blue-100/50 group-hover:scale-110 transition-transform">
+               <FileText className="w-5 h-5" />
+             </div>
+          </div>
+          <div className="text-xs text-brand-slate font-semibold flex items-center gap-1.5 pt-2 border-t border-slate-50">
+            <span className="text-brand-blue font-bold">{newInquiriesCount} new</span>
+            <span>pending review logs</span>
+          </div>
+        </div>
+
+        {/* Card 2: Projects */}
+        <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group flex flex-col justify-between h-36">
+          <div className="flex items-start justify-between">
+             <div>
+               <p className="text-xs font-bold uppercase tracking-wider text-brand-slate/80 font-mono">Case Studies</p>
+               <h3 className="text-3xl font-extrabold text-brand-navy mt-2 group-hover:text-brand-cyan transition-colors">{totalProjects}</h3>
+             </div>
+             <div className="h-10 w-10 rounded-xl bg-cyan-50 text-brand-cyan flex items-center justify-center border border-cyan-100/50 group-hover:scale-110 transition-transform">
+               <FolderGit2 className="w-5 h-5" />
+             </div>
+          </div>
+          <div className="text-xs text-brand-slate font-semibold flex items-center gap-1.5 pt-2 border-t border-slate-50">
+            <span className="text-brand-cyan font-bold">{featuredProjectsCount} featured</span>
+            <span>active on homepage</span>
+          </div>
+        </div>
+
+        {/* Card 3: Services */}
+        <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group flex flex-col justify-between h-36">
+          <div className="flex items-start justify-between">
+             <div>
+               <p className="text-xs font-bold uppercase tracking-wider text-brand-slate/80 font-mono">Services Offered</p>
+               <h3 className="text-3xl font-extrabold text-brand-navy mt-2 group-hover:text-indigo-600 transition-colors">{totalServices}</h3>
+             </div>
+             <div className="h-10 w-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100/50 group-hover:scale-110 transition-transform">
+               <ShieldCheck className="w-5 h-5" />
+             </div>
+          </div>
+          <div className="text-xs text-brand-slate font-semibold flex items-center gap-1.5 pt-2 border-t border-slate-50">
+            <span className="text-indigo-600 font-bold">Live Catalog</span>
+            <span>offering capabilities</span>
+          </div>
+        </div>
+
+        {/* Card 4: Platform Summary */}
+        <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all group flex flex-col justify-between h-36">
+          <div className="flex items-start justify-between">
+             <div>
+               <p className="text-xs font-bold uppercase tracking-wider text-brand-slate/80 font-mono">Platform Summary</p>
+               <h3 className="text-2xl font-extrabold text-brand-navy mt-2.5">
+                 {totalTeam} <span className="text-xs font-normal text-brand-slate">Team</span> • {totalClients} <span className="text-xs font-normal text-brand-slate">Clients</span>
+               </h3>
+             </div>
+             <div className="h-10 w-10 rounded-xl bg-slate-50 text-brand-slate flex items-center justify-center border border-slate-200/50 group-hover:scale-110 transition-transform">
+               <Users className="w-5 h-5" />
+             </div>
+          </div>
+          <div className="text-xs text-brand-slate font-semibold flex items-center gap-1.5 pt-2 border-t border-slate-50">
+            <span className="text-brand-navy font-bold">{totalBlogs} articles</span>
+            <span>published in Blogs Hub</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Chart Column: Inquiries Trend */}
+        <div className="lg:col-span-2 bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm flex flex-col justify-between relative">
+          <div className="flex justify-between items-center mb-6">
+            <div className="space-y-0.5">
+              <h4 className="text-sm font-bold text-brand-navy flex items-center gap-2">
+                <TrendingUp className="w-4.5 h-4.5 text-brand-blue" />
+                Inquiry Inflow Telemetry
+              </h4>
+              <p className="text-xs text-brand-slate font-mono">Monthly volume over the past 6 months</p>
+            </div>
+            <div className="text-[10px] font-bold font-mono text-brand-blue bg-blue-50/50 px-2 py-0.5 rounded border border-blue-100/50">
+              Live Chart
+            </div>
+          </div>
+
+          <div className="w-full relative">
+            {totalInquiries === 0 ? (
+              <div className="h-44 flex flex-col items-center justify-center text-center text-slate-400 space-y-2 font-mono">
+                <Activity className="w-8 h-8 text-slate-300 animate-pulse" />
+                <p className="text-xs">No client inquiries found. Start receiving inquiries to populate trend charts.</p>
+              </div>
+            ) : (
+              <div className="w-full overflow-visible">
+                <svg viewBox={`0 0 ${width} ${height}`} className="w-full overflow-visible">
+                  <defs>
+                    <linearGradient id="svgChartGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#007BFF" stopOpacity="0.25" />
+                      <stop offset="100%" stopColor="#007BFF" stopOpacity="0.00" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Y Axis Grid lines */}
+                  {[0, 1, 2, 3, 4].map((i) => {
+                    const val = (maxVal / 4) * i;
+                    const y = height - paddingBottom - (val / maxVal) * chartHeight;
+                    return (
+                      <g key={i}>
+                        <line 
+                          x1={paddingLeft} 
+                          y1={y} 
+                          x2={width - paddingRight} 
+                          y2={y} 
+                          stroke="#F1F5F9" 
+                          strokeWidth="1"
+                        />
+                        <text 
+                          x={paddingLeft - 10} 
+                          y={y + 3} 
+                          textAnchor="end" 
+                          className="text-[9px] fill-brand-slate/60 font-mono font-bold"
+                        >
+                          {Math.round(val)}
+                        </text>
+                      </g>
+                    );
+                  })}
+
+                  {/* Area path */}
+                  {areaPath && (
+                    <path 
+                      d={areaPath} 
+                      fill="url(#svgChartGradient)" 
+                    />
+                  )}
+
+                  {/* Curved Line */}
+                  {linePath && (
+                    <path 
+                      d={linePath} 
+                      fill="none" 
+                      stroke="#007BFF" 
+                      strokeWidth="2.5" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                    />
+                  )}
+
+                  {/* X Axis Labels & Dots */}
+                  {points.map((p, idx) => (
+                    <g key={idx}>
+                      <circle 
+                        cx={p.x} 
+                        cy={p.y} 
+                        r={hoveredPoint === idx ? "6" : "3.5"} 
+                        fill="#FFFFFF" 
+                        stroke="#007BFF" 
+                        strokeWidth="2.5" 
+                        className="transition-all duration-150 cursor-pointer"
+                        onMouseEnter={() => setHoveredPoint(idx)}
+                        onMouseLeave={() => setHoveredPoint(null)}
+                      />
+                      <text 
+                        x={p.x} 
+                        y={height - 8} 
+                        textAnchor="middle" 
+                        className="text-[9px] fill-brand-slate font-mono font-bold"
+                      >
+                        {p.label}
+                      </text>
+                    </g>
+                  ))}
+                </svg>
+
+                {/* Tooltip Overlay */}
+                {hoveredPoint !== null && (
+                  <div 
+                    className="absolute bg-brand-navy text-white text-[10px] font-bold font-mono px-2 py-1.5 rounded-lg shadow-xl border border-slate-700 pointer-events-none transform -translate-x-1/2 -translate-y-full"
+                    style={{ 
+                      left: `${(points[hoveredPoint].x / width) * 100}%`,
+                      top: `${(points[hoveredPoint].y / height) * 100 - 12}%` 
+                    }}
+                  >
+                    {points[hoveredPoint].label}: {points[hoveredPoint].value} inquiries
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Inquiries Distribution Breakdown */}
+        <div className="bg-white border border-slate-200/60 p-6 rounded-2xl shadow-sm flex flex-col justify-between">
+          <div>
+            <h4 className="text-sm font-bold text-brand-navy flex items-center gap-2 mb-1.5">
+              <BarChart3 className="w-4.5 h-4.5 text-brand-cyan" />
+              Project Scopes
+            </h4>
+            <p className="text-xs text-brand-slate font-mono mb-4">Breakdown of scopes from inquiry data</p>
+            
+            {scopesList.length === 0 ? (
+              <div className="h-32 flex items-center justify-center text-center text-xs text-slate-400 font-mono italic">
+                No scopes recorded
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {scopesList.slice(0, 4).map((scope, idx) => {
+                  const colors = [
+                    'bg-brand-blue',
+                    'bg-brand-cyan',
+                    'bg-indigo-500',
+                    'bg-emerald-500'
+                  ];
+                  return (
+                    <div key={idx} className="space-y-1.5">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-bold text-brand-navy truncate max-w-[140px]">{scope.name}</span>
+                        <span className="font-mono text-brand-slate font-bold">{scope.count} ({scope.percentage}%)</span>
+                      </div>
+                      <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                        <div 
+                          className={`${colors[idx % colors.length]} h-full rounded-full transition-all duration-500`}
+                          style={{ width: `${scope.percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="pt-5 border-t border-slate-100 mt-5">
+            <h5 className="text-[10px] font-bold font-mono text-brand-slate uppercase tracking-wider mb-3">Pipeline Status</h5>
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-2">
+                <div className="text-[10px] text-brand-slate font-mono font-bold">New</div>
+                <div className="text-sm font-extrabold text-brand-navy mt-1">{newInquiriesCount}</div>
+              </div>
+              <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-2">
+                <div className="text-[10px] text-brand-slate font-mono font-bold">Reviewed</div>
+                <div className="text-sm font-extrabold text-brand-navy mt-1">{reviewedInquiriesCount}</div>
+              </div>
+              <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-2">
+                <div className="text-[10px] text-brand-slate font-mono font-bold">Replied</div>
+                <div className="text-sm font-extrabold text-brand-navy mt-1">{respondedInquiriesCount}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity Log */}
+      <div className="bg-white border border-slate-200/60 rounded-3xl p-6 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-4 mb-4">
+          <div>
+            <h4 className="text-sm font-bold text-brand-navy">Recent Inquiries Received</h4>
+            <p className="text-xs text-brand-slate font-mono">Immediate pipeline action checklist</p>
+          </div>
+          <button 
+            type="button"
+            onClick={() => setActiveTab('inquiries')}
+            className="text-xs font-bold text-brand-blue hover:text-blue-600 font-mono uppercase tracking-wider transition-colors"
+          >
+            Go to Inquiries Hub →
+          </button>
+        </div>
+
+        {inquiries.length === 0 ? (
+          <div className="text-center py-8 text-xs text-brand-slate font-mono italic">
+            No recent inquiries recorded.
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {inquiries.slice(0, 3).map((inq) => (
+              <div key={inq._id} className="py-4 first:pt-0 last:pb-0 flex flex-wrap items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h5 className="font-bold text-brand-navy text-sm">{inq.clientName}</h5>
+                    <span className={`text-[9px] font-bold font-mono tracking-wider px-1.5 py-0.5 rounded uppercase ${
+                      inq.status === 'New' ? 'bg-brand-cyan/10 text-brand-blue' :
+                      inq.status === 'Reviewed' ? 'bg-brand-navy/5 text-brand-navy' :
+                      'bg-brand-blue/5 text-brand-blue'
+                    }`}>
+                      {inq.status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-brand-slate mt-1 max-w-xl truncate">{inq.message}</p>
+                </div>
+                <div className="text-[10px] text-brand-slate font-mono font-bold">
+                  Scope: <span className="text-brand-blue font-bold">{inq.projectScope}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default function AdminDashboard() {
   useSeo({
     title: 'Admin Dashboard',
@@ -121,7 +546,7 @@ export default function AdminDashboard() {
   });
 
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('inquiries');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [inquiries, setInquiries] = useState([]);
 
   // Admin Settings states
@@ -853,6 +1278,18 @@ export default function AdminDashboard() {
           {/* Navigation Tab Links Stacked Vertically */}
           <nav className="flex flex-col gap-1">
             <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-colors ${
+                activeTab === 'dashboard' 
+                  ? 'bg-brand-blue text-white shadow-md shadow-brand-blue/15' 
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+              }`}
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Console Dashboard</span>
+            </button>
+
+            <button
               onClick={() => setActiveTab('inquiries')}
               className={`w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center gap-3 transition-colors ${
                 activeTab === 'inquiries' 
@@ -968,6 +1405,19 @@ export default function AdminDashboard() {
 
       {/* Main Panel Content Area */}
       <main className="flex-grow lg:pl-[280px] p-6 sm:p-10 w-full overflow-x-hidden">
+        
+        {/* Render Dashboard Tab if active */}
+        {activeTab === 'dashboard' && (
+          <DashboardOverview 
+            inquiries={inquiries}
+            projects={projects}
+            team={team}
+            services={services}
+            blogs={blogs}
+            clients={clients}
+            setActiveTab={setActiveTab}
+          />
+        )}
         
         {/* Render Page Settings Tab if active */}
         {activeTab === 'pageSettings' && (

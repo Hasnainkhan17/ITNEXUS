@@ -31,6 +31,7 @@ export default function Home() {
   // Responsive slider states
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const [currentTeamIndex, setCurrentTeamIndex] = useState(0);
+  const [isTransitioning, setIsTransitioning] = useState(true);
 
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
@@ -38,18 +39,46 @@ export default function Home() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const itemsPerView = windowWidth < 768 ? 1 : (team.length > 0 ? Math.min(team.length, 4) : 4);
-  const canSlide = team.length > itemsPerView;
-  const maxIndex = canSlide ? team.length - itemsPerView : 0;
+  const itemsPerView = windowWidth < 768 ? 1 : (windowWidth < 1024 ? 2 : 4);
 
-  // Auto-slide effect for Team (only on mobile)
+  const baseTeam = (() => {
+    if (team.length === 0) return [];
+    let base = [...team];
+    while (base.length < 8) {
+      base = [...base, ...team];
+    }
+    return base;
+  })();
+
+  const extendedTeam = baseTeam.length > 0 ? [...baseTeam, ...baseTeam.slice(0, itemsPerView)] : [];
+
+  // Auto-slide effect for Team (both mobile and desktop)
   useEffect(() => {
-    if (!canSlide || team.length === 0 || windowWidth >= 768) return;
+    if (team.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentTeamIndex((prev) => (prev >= maxIndex ? 0 : prev + 1));
+      setIsTransitioning(true);
+      setCurrentTeamIndex((prev) => prev + 1);
     }, 4000);
     return () => clearInterval(interval);
-  }, [team, canSlide, maxIndex, windowWidth]);
+  }, [team.length]);
+
+  // Handle re-enabling transition after reset
+  useEffect(() => {
+    if (!isTransitioning && currentTeamIndex === 0) {
+      const timeout = setTimeout(() => {
+        setIsTransitioning(true);
+      }, 50);
+      return () => clearTimeout(timeout);
+    }
+  }, [isTransitioning, currentTeamIndex]);
+
+  // Prevent index overflow on viewport resize
+  useEffect(() => {
+    if (baseTeam.length > 0 && currentTeamIndex > baseTeam.length) {
+      setCurrentTeamIndex(0);
+      setIsTransitioning(false);
+    }
+  }, [baseTeam.length, currentTeamIndex]);
 
   useEffect(() => {
     // Fetch featured projects
@@ -101,6 +130,22 @@ export default function Home() {
       transition: {
         staggerChildren: 0.1
       }
+    }
+  };
+
+  const getMarqueeClients = () => {
+    if (clients.length === 0) return [];
+    let base = [...clients];
+    while (base.length < 20) {
+      base = [...base, ...clients];
+    }
+    return [...base, ...base];
+  };
+
+  const handleTransitionEnd = () => {
+    if (currentTeamIndex >= baseTeam.length) {
+      setIsTransitioning(false);
+      setCurrentTeamIndex(0);
     }
   };
 
@@ -270,7 +315,7 @@ export default function Home() {
           {clients.length > 0 && (
             <div className="overflow-hidden flex w-full">
               <div className="animate-marquee flex gap-8 py-4">
-                {[...clients, ...clients].map((client, idx) => (
+                {getMarqueeClients().map((client, idx) => (
                   <div key={idx} className="w-24 h-24 rounded-full bg-white border border-slate-100 flex items-center justify-center p-4 shadow-sm flex-shrink-0">
                     <img
                       src={resolveAssetUrl(client.logoUrl)}
@@ -372,53 +417,23 @@ export default function Home() {
           </div>
         </div>
 
-        {windowWidth < 768 ? (
-          /* Mobile Slider */
-          <div className="overflow-hidden w-full relative">
-            <div 
-              className="flex transition-transform duration-500 ease-in-out"
-              style={{
-                transform: `translateX(-${currentTeamIndex * 100}%)`
-              }}
-            >
-              {team.map((member) => (
-                <div 
-                  key={member._id} 
-                  className="px-4 flex-shrink-0 w-full"
-                >
-                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all text-center flex flex-col justify-between h-full overflow-hidden">
-                    <div>
-                      <div className="w-full h-50 bg-slate-100 relative overflow-hidden">
-                        <img
-                          src={resolveAssetUrl(member.imageUrl)}
-                          alt={member.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-6 pb-6">
-                        <h3 className="text-lg font-bold text-brand-navy mb-1">{member.name}</h3>
-                        <p className="text-xs font-semibold text-brand-blue mb-3 tracking-wider uppercase">{member.role}</p>
-                        <p className="text-xs text-brand-slate leading-relaxed font-body max-w-xs mx-auto">
-                          {member.shortBio}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : (
-          /* Desktop Grid (No sliding, static display) */
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {team.map((member) => (
+        <div className="overflow-hidden w-full relative">
+          <div 
+            className="flex -mx-3"
+            style={{
+              transform: `translateX(-${currentTeamIndex * (100 / itemsPerView)}%)`,
+              transition: isTransitioning ? 'transform 500ms ease-in-out' : 'none'
+            }}
+            onTransitionEnd={handleTransitionEnd}
+          >
+            {extendedTeam.map((member, idx) => (
               <div 
-                key={member._id} 
-                className="w-full"
+                key={`${member._id}-${idx}`} 
+                className="px-3 flex-shrink-0 w-full md:w-1/2 lg:w-1/4"
               >
                 <div className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-all text-center flex flex-col justify-between h-full overflow-hidden">
                   <div>
-                    <div className="w-full h-50 bg-slate-100 relative overflow-hidden">
+                    <div className="w-full h-64 bg-slate-100 relative overflow-hidden">
                       <img
                         src={resolveAssetUrl(member.imageUrl)}
                         alt={member.name}
@@ -437,7 +452,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-        )}
+        </div>
       </section>
     </div>
   );

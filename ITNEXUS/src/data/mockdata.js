@@ -71,9 +71,9 @@ export const footerCategories = [
     {
         title: "Contact Info",
         links: [
-            { label: "📧 info@itnexus.org", url: "mailto:info@itnexus.org" },
-            { label: "📞 +92 (300) 123-4567", url: "tel:+923001234567" },
-            { label: "📍 Regional Office, PK", url: "/contact" }
+            { label: "info@itnexus.org", url: "mailto:info@itnexus.org" },
+            { label: "+92 (300) 123-4567", url: "tel:+923001234567" },
+            { label: "Regional Office, PK", url: "/contact" }
         ]
     }
 ];

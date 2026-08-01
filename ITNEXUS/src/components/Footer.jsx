@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { footerCategories } from '../data/mockdata';
 import logoUrl from '../assets/itnexus-mark-reversed-256px.png';
 import { API_BASE_URL } from '../config';
+import { Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
     const [pageContent, setPageContent] = useState(null);
@@ -21,15 +22,15 @@ export default function Footer() {
                 ...col,
                 links: [
                     { 
-                        label: `📧 ${pageContent.contactEmail || 'info@itnexus.org'}`, 
+                        label: pageContent.contactEmail || 'info@itnexus.org', 
                         url: `mailto:${pageContent.contactEmail || 'info@itnexus.org'}` 
                     },
                     { 
-                        label: `📞 ${pageContent.contactPhone || '+92 (300) 123-4567'}`, 
+                        label: pageContent.contactPhone || '+92 (300) 123-4567', 
                         url: `tel:${(pageContent.contactPhone || '+92 (300) 123-4567').replace(/[^+\d]/g, '')}` 
                     },
                     { 
-                        label: `📍 ${pageContent.contactAddress || 'Regional Office, PK'}`, 
+                        label: pageContent.contactAddress || 'Regional Office, PK', 
                         url: '/contact' 
                     }
                 ]
@@ -65,13 +66,36 @@ export default function Footer() {
                             <div className="flex flex-col space-y-2.5 pt-1">
                                 {col.links.map((link, lIdx) => {
                                     const isExternal = link.url.startsWith('mailto:') || link.url.startsWith('tel:') || link.url.startsWith('http');
+                                    
+                                    // Determine if this link is a contact channel to render Lucide Icons instead of emojis
+                                    let IconComponent = null;
+                                    let cleanLabel = link.label;
+
+                                    if (link.url.startsWith('mailto:')) {
+                                        IconComponent = Mail;
+                                        cleanLabel = cleanLabel.replace('📧 ', '');
+                                    } else if (link.url.startsWith('tel:')) {
+                                        IconComponent = Phone;
+                                        cleanLabel = cleanLabel.replace('📞 ', '');
+                                    } else if (col.title === 'Contact Info' && (link.url === '/contact' || cleanLabel.includes('Office') || cleanLabel.includes('📍'))) {
+                                        IconComponent = MapPin;
+                                        cleanLabel = cleanLabel.replace('📍 ', '');
+                                    }
+
+                                    const linkContent = (
+                                        <span className="flex items-center gap-2">
+                                            {IconComponent && <IconComponent className="w-3.5 h-3.5 text-brand-blue flex-shrink-0" />}
+                                            <span>{cleanLabel}</span>
+                                        </span>
+                                    );
+
                                     return isExternal ? (
                                         <a
                                             key={lIdx}
                                             href={link.url}
                                             className="text-sm text-slate-600 hover:text-brand-blue hover:translate-x-1 transition-all duration-200 block"
                                         >
-                                            {link.label}
+                                            {linkContent}
                                         </a>
                                     ) : (
                                         <Link
@@ -79,7 +103,7 @@ export default function Footer() {
                                             to={link.url}
                                             className="text-sm text-slate-600 hover:text-brand-blue hover:translate-x-1 transition-all duration-200 block"
                                         >
-                                            {link.label}
+                                            {linkContent}
                                         </Link>
                                     );
                                 })}
