@@ -8,9 +8,23 @@ const nodemailer = require('nodemailer');
  * @param {string} options.html - HTML body of the email
  * @returns {Promise<boolean>} Resolves to true if successful, false otherwise
  */
+const cleanEnvValue = (val) => {
+  if (typeof val === 'string') {
+    return val.replace(/^["']|["']$/g, '').trim();
+  }
+  return val;
+};
+
 const sendEmail = async ({ to, subject, html, text, from, replyTo }) => {
+  const host = cleanEnvValue(process.env.EMAIL_HOST);
+  const user = cleanEnvValue(process.env.EMAIL_USER);
+  const pass = cleanEnvValue(process.env.EMAIL_PASS);
+  const port = parseInt(cleanEnvValue(process.env.EMAIL_PORT) || '587');
+  const secure = cleanEnvValue(process.env.EMAIL_SECURE) === 'true';
+  const fromEmail = cleanEnvValue(process.env.EMAIL_FROM);
+
   // If SMTP is not configured, log a warning and exit gracefully
-  if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  if (!host || !user || !pass) {
     console.warn(
       'SMTP Email is not configured. Skipping email delivery. ' +
       'Please add EMAIL_HOST, EMAIL_USER, and EMAIL_PASS to server/.env'
@@ -19,12 +33,12 @@ const sendEmail = async ({ to, subject, html, text, from, replyTo }) => {
   }
 
   const transporter = nodemailer.createTransport({
-    host: process.env.EMAIL_HOST,
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: process.env.EMAIL_SECURE === 'true', // true for port 465, false for port 587/25
+    host,
+    port,
+    secure,
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user,
+      pass,
     },
     tls: {
       // Do not fail on invalid certificates
@@ -33,7 +47,7 @@ const sendEmail = async ({ to, subject, html, text, from, replyTo }) => {
   });
 
   const mailOptions = {
-    from: from || process.env.EMAIL_FROM || `"ITNEXUS Contact Portal" <${process.env.EMAIL_USER}>`,
+    from: from || fromEmail || `"ITNEXUS Contact Portal" <${user}>`,
     to,
     replyTo: replyTo || undefined,
     subject,
