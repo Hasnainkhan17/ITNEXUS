@@ -8,7 +8,7 @@ const nodemailer = require('nodemailer');
  * @param {string} options.html - HTML body of the email
  * @returns {Promise<boolean>} Resolves to true if successful, false otherwise
  */
-const sendEmail = async ({ to, subject, html }) => {
+const sendEmail = async ({ to, subject, html, from, replyTo }) => {
   // If SMTP is not configured, log a warning and exit gracefully
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.warn(
@@ -33,8 +33,9 @@ const sendEmail = async ({ to, subject, html }) => {
   });
 
   const mailOptions = {
-    from: process.env.EMAIL_FROM || `"ITNEXUS Contact Portal" <${process.env.EMAIL_USER}>`,
+    from: from || process.env.EMAIL_FROM || `"ITNEXUS Contact Portal" <${process.env.EMAIL_USER}>`,
     to,
+    replyTo: replyTo || undefined,
     subject,
     html,
   };

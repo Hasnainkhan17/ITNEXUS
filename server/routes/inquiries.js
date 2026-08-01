@@ -72,6 +72,8 @@ router.post('/', async (req, res) => {
     // Send email asynchronously in the background so it doesn't block the API response
     sendEmail({
       to: recipientEmail,
+      from: `"${clientName} via ITNEXUS" <${process.env.EMAIL_USER}>`,
+      replyTo: clientEmail,
       subject: emailSubject,
       html: emailBody
     });

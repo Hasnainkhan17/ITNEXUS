@@ -549,6 +549,21 @@ export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [inquiries, setInquiries] = useState([]);
 
+  // Unified global success toast state
+  const [globalSuccess, setGlobalSuccess] = useState('');
+  const [successTimeoutId, setSuccessTimeoutId] = useState(null);
+
+  const showSuccessMessage = (message) => {
+    setGlobalSuccess(message);
+    if (successTimeoutId) {
+      clearTimeout(successTimeoutId);
+    }
+    const timeoutId = setTimeout(() => {
+      setGlobalSuccess('');
+    }, 4000);
+    setSuccessTimeoutId(timeoutId);
+  };
+
   // Admin Settings states
   const [adminUsername, setAdminUsername] = useState('');
   const [adminPassword, setAdminPassword] = useState('');
@@ -918,6 +933,7 @@ export default function AdminDashboard() {
           projectUrl: ''
         });
         setShowAddProjectModal(false);
+        showSuccessMessage('Case study project created successfully!');
       } else {
         const errData = await response.json();
         setProjectError(errData.message || 'Failed to create project.');
@@ -986,6 +1002,7 @@ export default function AdminDashboard() {
           imageUrl: 'itnexus-mark-color-512px.png'
         });
         setShowAddTeamModal(false);
+        showSuccessMessage('Architect profile created successfully!');
       } else {
         const errData = await response.json();
         setTeamError(errData.message || 'Failed to create team member.');
@@ -1035,6 +1052,7 @@ export default function AdminDashboard() {
         setServices(prev => [...prev, data]);
         setNewService({ title: '', description: '', icon: 'Code', displayOrder: 0, technologies: '', deliverables: '' });
         setShowAddServiceModal(false);
+        showSuccessMessage('Service capability added successfully!');
       } else {
         const errData = await response.json();
         setServiceError(errData.message || 'Failed to add service');
@@ -1116,6 +1134,7 @@ export default function AdminDashboard() {
           logoUrl: 'itnexus-mark-color-512px.png'
         });
         setShowAddClientModal(false);
+        showSuccessMessage('Client partner logo added successfully!');
       } else {
         alert('Failed to add client');
       }
@@ -1178,6 +1197,7 @@ export default function AdminDashboard() {
           displayOrder: 0
         });
         setShowAddBlogModal(false);
+        showSuccessMessage('Blog article published successfully!');
       } else {
         const errData = await response.json();
         setBlogError(errData.message || 'Failed to add article');
@@ -1404,8 +1424,16 @@ export default function AdminDashboard() {
       </aside>
 
       {/* Main Panel Content Area */}
-      <main className="flex-grow lg:pl-[280px] p-6 sm:p-10 w-full overflow-x-hidden">
+      <main className="flex-grow lg:pl-[280px] p-6 sm:p-10 w-full overflow-x-hidden relative">
         
+        {/* Global Success Notification Toast */}
+        {globalSuccess && (
+          <div className="bg-emerald-50 text-emerald-800 text-xs p-4 rounded-xl border border-emerald-200 flex items-center gap-2.5 mb-6 animate-fadeIn shadow-sm">
+            <Check className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+            <span className="font-bold">{globalSuccess}</span>
+          </div>
+        )}
+
         {/* Render Dashboard Tab if active */}
         {activeTab === 'dashboard' && (
           <DashboardOverview 
