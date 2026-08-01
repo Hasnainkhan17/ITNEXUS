@@ -8,7 +8,7 @@ const nodemailer = require('nodemailer');
  * @param {string} options.html - HTML body of the email
  * @returns {Promise<boolean>} Resolves to true if successful, false otherwise
  */
-const sendEmail = async ({ to, subject, html, from, replyTo }) => {
+const sendEmail = async ({ to, subject, html, text, from, replyTo }) => {
   // If SMTP is not configured, log a warning and exit gracefully
   if (!process.env.EMAIL_HOST || !process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.warn(
@@ -37,7 +37,8 @@ const sendEmail = async ({ to, subject, html, from, replyTo }) => {
     to,
     replyTo: replyTo || undefined,
     subject,
-    html,
+    html: html || undefined,
+    text: text || undefined,
   };
 
   try {

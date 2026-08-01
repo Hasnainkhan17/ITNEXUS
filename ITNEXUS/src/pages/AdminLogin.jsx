@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, Lock, Mail, AlertTriangle, Key, ArrowLeft, CheckCircle } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { ShieldCheck, Lock, Mail, AlertTriangle, Key, ArrowLeft, CheckCircle, Home } from 'lucide-react';
 import { API_BASE_URL } from '../config';
 import useSeo from '../utils/useSeo';
 
@@ -138,7 +138,18 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="w-full min-h-[80vh] flex items-center justify-center px-6 py-12">
+    <div className="w-full min-h-[80vh] flex items-center justify-center px-6 py-12 relative">
+      
+      {/* Floating Home Button */}
+      <div className="absolute top-6 left-6 z-10">
+        <Link 
+          to="/" 
+          className="flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-brand-blue hover:border-brand-blue/30 transition-all px-3.5 py-2 rounded-full border border-slate-200/60 bg-white shadow-sm hover:shadow"
+        >
+          <Home className="w-3.5 h-3.5" /> Back to Home
+        </Link>
+      </div>
+
       <div className="w-full max-w-md bg-white border border-slate-200/60 rounded-3xl p-8 sm:p-10 shadow-xl space-y-6">
 
         {/* Brand Icon */}
