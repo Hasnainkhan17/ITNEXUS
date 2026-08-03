@@ -94,6 +94,7 @@ export default function Projects() {
                   <img
                     src={resolveAssetUrl(project.thumbnailUrl)}
                     alt={project.title}
+                    loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm border border-slate-200/50 text-[10px] font-bold font-mono tracking-wider text-brand-blue uppercase px-2.5 py-1 rounded-md">
@@ -155,6 +156,7 @@ export default function Projects() {
                   <img
                     src={resolveAssetUrl(selectedProject.thumbnailUrl)}
                     alt={selectedProject.title}
+                    loading="lazy"
                     className="w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />

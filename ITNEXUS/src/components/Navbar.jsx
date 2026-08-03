@@ -47,6 +47,8 @@ export default function Navbar() {
                     <li>
                         <Link
                             to="/about"
+                            onMouseEnter={() => import('../pages/About')}
+                            onTouchStart={() => import('../pages/About')}
                             className={`transition-colors ${isActive('/about') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}
                         >
                             About
@@ -55,6 +57,8 @@ export default function Navbar() {
                     <li>
                         <Link
                             to="/services"
+                            onMouseEnter={() => import('../pages/Services')}
+                            onTouchStart={() => import('../pages/Services')}
                             className={`transition-colors ${isActive('/services') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}
                         >
                             Services
@@ -63,6 +67,8 @@ export default function Navbar() {
                     <li>
                         <Link
                             to="/projects"
+                            onMouseEnter={() => import('../pages/Projects')}
+                            onTouchStart={() => import('../pages/Projects')}
                             className={`transition-colors ${isActive('/projects') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}
                         >
                             Projects
@@ -71,6 +77,8 @@ export default function Navbar() {
                     <li>
                         <Link
                             to="/blog"
+                            onMouseEnter={() => import('../pages/BlogHub')}
+                            onTouchStart={() => import('../pages/BlogHub')}
                             className={`transition-colors ${isActive('/blog') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}
                         >
                             Blog
@@ -79,6 +87,8 @@ export default function Navbar() {
                     <li>
                         <Link
                             to="/team"
+                            onMouseEnter={() => import('../pages/Team')}
+                            onTouchStart={() => import('../pages/Team')}
                             className={`transition-colors ${isActive('/team') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}
                         >
                             Team
@@ -87,6 +97,8 @@ export default function Navbar() {
                     <li>
                         <Link
                             to="/contact"
+                            onMouseEnter={() => import('../pages/Contact')}
+                            onTouchStart={() => import('../pages/Contact')}
                             className={`transition-colors ${isActive('/contact') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}
                         >
                             Contact
@@ -130,32 +142,32 @@ export default function Navbar() {
                             </Link>
                         </li>
                         <li>
-                            <Link to="/about" onClick={() => setIsOpen(false)} className={`block py-2 transition-colors ${isActive('/about') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
+                            <Link to="/about" onClick={() => setIsOpen(false)} onTouchStart={() => import('../pages/About')} className={`block py-2 transition-colors ${isActive('/about') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
                                 About
                             </Link>
                         </li>
                         <li>
-                            <Link to="/services" onClick={() => setIsOpen(false)} className={`block py-2 transition-colors ${isActive('/services') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
+                            <Link to="/services" onClick={() => setIsOpen(false)} onTouchStart={() => import('../pages/Services')} className={`block py-2 transition-colors ${isActive('/services') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
                                 Services
                             </Link>
                         </li>
                         <li>
-                            <Link to="/projects" onClick={() => setIsOpen(false)} className={`block py-2 transition-colors ${isActive('/projects') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
+                            <Link to="/projects" onClick={() => setIsOpen(false)} onTouchStart={() => import('../pages/Projects')} className={`block py-2 transition-colors ${isActive('/projects') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
                                 Projects
                             </Link>
                         </li>
                         <li>
-                            <Link to="/blog" onClick={() => setIsOpen(false)} className={`block py-2 transition-colors ${isActive('/blog') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
+                            <Link to="/blog" onClick={() => setIsOpen(false)} onTouchStart={() => import('../pages/BlogHub')} className={`block py-2 transition-colors ${isActive('/blog') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
                                 Blog
                             </Link>
                         </li>
                         <li>
-                            <Link to="/team" onClick={() => setIsOpen(false)} className={`block py-2 transition-colors ${isActive('/team') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
+                            <Link to="/team" onClick={() => setIsOpen(false)} onTouchStart={() => import('../pages/Team')} className={`block py-2 transition-colors ${isActive('/team') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
                                 Team
                             </Link>
                         </li>
                         <li>
-                            <Link to="/contact" onClick={() => setIsOpen(false)} className={`block py-2 transition-colors ${isActive('/contact') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
+                            <Link to="/contact" onClick={() => setIsOpen(false)} onTouchStart={() => import('../pages/Contact')} className={`block py-2 transition-colors ${isActive('/contact') ? 'text-brand-blue' : 'text-brand-slate hover:text-brand-navy'}`}>
                                 Contact
                             </Link>
                         </li>

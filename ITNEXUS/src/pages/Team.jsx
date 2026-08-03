@@ -53,6 +53,7 @@ export default function Team() {
                     <img
                       src={resolveAssetUrl(member.imageUrl)}
                       alt={member.name}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                   </div>

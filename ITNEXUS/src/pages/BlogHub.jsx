@@ -105,6 +105,7 @@ export default function BlogHub() {
                       <img 
                         src={resolveAssetUrl(blog.imageUrl)} 
                         alt={blog.title} 
+                        loading="lazy"
                         className="absolute inset-0 w-full h-full object-cover z-10 transition-transform duration-500 group-hover:scale-105"
                       />
                     )}

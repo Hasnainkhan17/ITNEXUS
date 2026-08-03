@@ -81,35 +81,20 @@ export default function Home() {
   }, [baseTeam.length, currentTeamIndex]);
 
   useEffect(() => {
-    // Fetch featured projects
-    fetch(`${API_BASE_URL}/projects?featured=true`)
-      .then(res => res.json())
-      .then(data => setFeaturedProjects(data))
-      .catch(err => console.error('Error fetching projects:', err));
-
-    // Fetch active team members
-    fetch(`${API_BASE_URL}/team`)
-      .then(res => res.json())
-      .then(data => setTeam(data))
-      .catch(err => console.error('Error fetching team:', err));
-
-    // Fetch active clients
-    fetch(`${API_BASE_URL}/clients`)
-      .then(res => res.json())
-      .then(data => setClients(data))
-      .catch(err => console.error('Error fetching clients:', err));
-
-    // Fetch active services
-    fetch(`${API_BASE_URL}/services`)
-      .then(res => res.json())
-      .then(data => setServices(data))
-      .catch(err => console.error('Error fetching services:', err));
-
-    // Fetch page contents settings
-    fetch(`${API_BASE_URL}/page-contents`)
-      .then(res => res.json())
-      .then(data => setPageContent(data))
-      .catch(err => console.error('Error fetching page contents:', err));
+    // Fetch combined homepage data
+    fetch(`${API_BASE_URL}/homepage-data`)
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch homepage data');
+        return res.json();
+      })
+      .then(data => {
+        setFeaturedProjects(data.projects || []);
+        setTeam(data.team || []);
+        setClients(data.clients || []);
+        setServices(data.services || []);
+        setPageContent(data.pageContent || null);
+      })
+      .catch(err => console.error('Error fetching combined homepage data:', err));
   }, []);
 
   const resolveHeroBg = (imageName) => {
@@ -321,6 +306,7 @@ export default function Home() {
                       src={resolveAssetUrl(client.logoUrl)}
                       alt={client.clientName}
                       title={client.clientName}
+                      loading="lazy"
                       className="max-h-12 max-w-full object-contain filter grayscale opacity-70 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
                     />
                   </div>
@@ -366,6 +352,7 @@ export default function Home() {
                 <img
                   src={resolveAssetUrl(project.thumbnailUrl)}
                   alt={project.title}
+                  loading="lazy"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm border border-slate-200/50 text-[10px] font-bold font-mono tracking-wider text-brand-blue uppercase px-2.5 py-1 rounded-md">
@@ -437,6 +424,7 @@ export default function Home() {
                       <img
                         src={resolveAssetUrl(member.imageUrl)}
                         alt={member.name}
+                        loading="lazy"
                         className="w-full h-full object-cover"
                       />
                     </div>
