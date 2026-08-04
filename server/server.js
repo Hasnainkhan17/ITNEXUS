@@ -145,22 +145,53 @@ app.all('/api/*', (req, res) => {
 
 // Serve the built React frontend in production
 const fs = require('fs');
-const publicPath = path.join(__dirname, 'public');
-const fallbackPath = path.join(__dirname, '..', 'ITNEXUS', 'dist');
 
-let frontendBuildPath;
-if (fs.existsSync(path.join(publicPath, 'index.html'))) {
-  frontendBuildPath = publicPath;
-} else {
-  frontendBuildPath = fallbackPath;
-}
+// Check all candidate locations for static build output
+const candidatePaths = [
+  path.join(__dirname, 'public'),
+  path.join(__dirname, '..', 'ITNEXUS', 'dist'),
+  path.join(process.cwd(), 'server', 'public'),
+  path.join(process.cwd(), 'ITNEXUS', 'dist'),
+  path.join(process.cwd(), 'public'),
+  path.join(process.cwd(), 'dist'),
+];
+
+let frontendBuildPath = candidatePaths.find(p => fs.existsSync(path.join(p, 'index.html'))) || candidatePaths[0];
 console.log(`Serving frontend from: ${frontendBuildPath}`);
 
-app.use(express.static(frontendBuildPath));
+// Register express.static with static cache controls
+app.use(express.static(frontendBuildPath, {
+  maxAge: '1y',
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  }
+}));
+
+// Fallback static serving for other candidate paths if present
+candidatePaths.forEach(p => {
+  if (p !== frontendBuildPath && fs.existsSync(p)) {
+    app.use(express.static(p));
+  }
+});
+
+// Asset 404 Guard: Return 404 for missing assets instead of serving index.html (prevents MIME type errors)
+app.use((req, res, next) => {
+  if (req.path.startsWith('/assets/') || req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/i)) {
+    return res.status(404).send('Asset not found');
+  }
+  next();
+});
 
 // SPA catch-all: any non-API route serves the React app's index.html
 app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  const indexPath = path.join(frontendBuildPath, 'index.html');
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    res.status(404).send('Application index.html not found');
+  }
 });
 
 // Start server
