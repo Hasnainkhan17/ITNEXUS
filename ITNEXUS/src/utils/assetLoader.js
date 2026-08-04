@@ -4,6 +4,7 @@ import logoVerticalColor from '../assets/itnexus-logo-vertical-color@2x.png';
 import logoVerticalReversed from '../assets/itnexus-logo-vertical-reversed@2x.png';
 import markColor from '../assets/itnexus-mark-color-512px.png';
 import markReversed from '../assets/itnexus-mark-reversed-512px.png';
+import { API_BASE_URL } from '../config';
 
 /**
  * Dynamic branding asset loader.
@@ -41,6 +42,10 @@ export const getBrandingAsset = (variant, useCDN = false, cdnBaseUrl = '') => {
 export const resolveAssetUrl = (name) => {
   if (!name) return markColor;
   if (typeof name !== 'string') return name;
+  if (name.startsWith('/api/')) {
+    const origin = API_BASE_URL.replace(/\/api\/?$/, '');
+    return `${origin}${name}`;
+  }
   if (name.startsWith('http://') || name.startsWith('https://') || name.startsWith('data:') || name.startsWith('/')) {
     return name;
   }
