@@ -139,13 +139,9 @@ export default function Home() {
       {/* 1. HERO SECTION WITH FULL BACKGROUND */}
       <section
         id="home"
-        className="w-screen min-h-screen md:h-screen  relative left-1/2 right-1/2 -translate-x-1/2 pt-36 pb-20 md:pt-48 md:pb-32 px-6 lg:px-12 border-b border-slate-200/60 overflow-hidden bg-slate-950 flex items-center justify-center "
+        className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-16 px-4 overflow-hidden bg-slate-950 bg-cover bg-center bg-no-repeat bg-scroll md:bg-fixed"
         style={{
-          backgroundImage: `url(${resolveHeroBg(pageContent?.homeHeroBgImage)})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: windowWidth < 768 ? 'scroll' : 'fixed'
+          backgroundImage: pageContent?.homeHeroBgImage ? `url(${pageContent.homeHeroBgImage})` : `url(${heroBg})`
         }}
       >
         {/* Backdrop overlay for maximum contrast */}
@@ -353,6 +349,7 @@ export default function Home() {
                   src={resolveAssetUrl(project.thumbnailUrl)}
                   alt={project.title}
                   loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm border border-slate-200/50 text-[10px] font-bold font-mono tracking-wider text-brand-blue uppercase px-2.5 py-1 rounded-md">
@@ -425,6 +422,7 @@ export default function Home() {
                         src={resolveAssetUrl(member.imageUrl)}
                         alt={member.name}
                         loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover"
                       />
                     </div>

@@ -97,13 +97,21 @@ app.get('/api/homepage-data', async (req, res) => {
     }
 
     // Fetch all homepage components in parallel
-    const [projects, team, clients, services, pageContent] = await Promise.all([
+    const [projects, rawTeam, clients, services, pageContent] = await Promise.all([
       Project.find({ isFeaturedOnHome: true }).sort({ displayOrder: 1, createdAt: -1 }).limit(6),
       Team.find({ isActive: true }).sort({ displayOrder: 1, createdAt: 1 }),
       Client.find({ isActive: true }).sort({ displayOrder: 1, createdAt: 1 }),
       Service.find().sort({ displayOrder: 1, createdAt: 1 }),
-      PageContent.findOne()
+      PageContent.findOne().select('homeHeroBgImage homeHeroHeading homeHeroParagraph homeAboutHeading homeAboutParagraph homeStatsCountries homeStatsProjects homeStatsPrecision homeServicesSubheading homeServicesHeading homeProjectsSubheading homeProjectsHeading homeTeamSubheading homeTeamHeading homeClientsSubheading homeClientsHeading homeCtaHeading homeCtaSubheading homeCtaButtonText')
     ]);
+
+    const team = rawTeam.map(member => {
+      const obj = member.toObject ? member.toObject() : { ...member };
+      if (obj.imageUrl && obj.imageUrl.startsWith('data:')) {
+        obj.imageUrl = `/api/team/${obj._id}/image`;
+      }
+      return obj;
+    });
 
     let finalPageContent = pageContent;
     if (!finalPageContent) {

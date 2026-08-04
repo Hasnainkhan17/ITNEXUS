@@ -41,7 +41,7 @@ export const getBrandingAsset = (variant, useCDN = false, cdnBaseUrl = '') => {
 export const resolveAssetUrl = (name) => {
   if (!name) return markColor;
   if (typeof name !== 'string') return name;
-  if (name.startsWith('http://') || name.startsWith('https://') || name.startsWith('data:')) {
+  if (name.startsWith('http://') || name.startsWith('https://') || name.startsWith('data:') || name.startsWith('/')) {
     return name;
   }
   const lower = name.toLowerCase();

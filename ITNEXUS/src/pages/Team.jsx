@@ -54,6 +54,7 @@ export default function Team() {
                       src={resolveAssetUrl(member.imageUrl)}
                       alt={member.name}
                       loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover"
                     />
                   </div>
