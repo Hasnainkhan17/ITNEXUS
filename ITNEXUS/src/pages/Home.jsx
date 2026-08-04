@@ -139,7 +139,7 @@ export default function Home() {
       {/* 1. HERO SECTION WITH FULL BACKGROUND */}
       <section
         id="home"
-        className="relative min-h-[90vh] flex items-center justify-center pt-24 pb-16 px-4 overflow-hidden bg-slate-950 bg-cover bg-center bg-no-repeat bg-scroll md:bg-fixed"
+        className="w-screen min-h-screen md:h-screen relative left-1/2 right-1/2 -translate-x-1/2 pt-36 pb-20 md:pt-48 md:pb-32 px-6 lg:px-12 border-b border-slate-200/60 overflow-hidden bg-slate-950 flex items-center justify-center bg-cover bg-center bg-no-repeat bg-scroll md:bg-fixed"
         style={{
           backgroundImage: pageContent?.homeHeroBgImage ? `url(${pageContent.homeHeroBgImage})` : `url(${heroBg})`
         }}

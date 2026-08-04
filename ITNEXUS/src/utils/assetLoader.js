@@ -43,7 +43,9 @@ export const resolveAssetUrl = (name) => {
   if (!name) return markColor;
   if (typeof name !== 'string') return name;
   if (name.startsWith('/api/')) {
-    const origin = API_BASE_URL.replace(/\/api\/?$/, '');
+    const origin = (typeof API_BASE_URL === 'string' && API_BASE_URL.includes('://'))
+      ? API_BASE_URL.replace(/\/api\/?$/, '')
+      : '';
     return `${origin}${name}`;
   }
   if (name.startsWith('http://') || name.startsWith('https://') || name.startsWith('data:') || name.startsWith('/')) {
