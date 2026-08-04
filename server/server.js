@@ -1,4 +1,4 @@
-// Trigger Hostinger Passenger restart: 2026-08-04 17:36
+// Trigger Hostinger Passenger restart: 2026-08-04 18:05
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -92,6 +92,12 @@ app.use('/api/page-contents', require('./routes/pageContents'));
 app.get('/api/homepage-data', async (req, res) => {
   try {
     const now = Date.now();
+    // Auto-purge memory cache if stale bloated base64 payload (>200KB) is detected or ?nocache is requested
+    if (req.query.nocache || (homepageDataCache && JSON.stringify(homepageDataCache).length > 200000)) {
+      homepageDataCache = null;
+      homepageDataCacheTime = 0;
+    }
+
     if (homepageDataCache && (now - homepageDataCacheTime < CACHE_TTL)) {
       return res.json(homepageDataCache);
     }
