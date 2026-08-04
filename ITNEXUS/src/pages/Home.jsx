@@ -424,6 +424,9 @@ export default function Home() {
                         loading="lazy"
                         decoding="async"
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          console.warn(`[Image Load Warning] ${member.name} image failed to load from:`, e.target.src);
+                        }}
                       />
                     </div>
                     <div className="p-6 pb-6">

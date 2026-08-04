@@ -11,12 +11,23 @@ export default function Team() {
   });
 
   const [team, setTeam] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/team`)
-      .then(res => res.json())
-      .then(data => setTeam(data))
-      .catch(err => console.error('Error fetching team:', err));
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch team');
+        return res.json();
+      })
+      .then(data => {
+        if (Array.isArray(data)) {
+          setTeam(data);
+        } else {
+          setTeam([]);
+        }
+      })
+      .catch(err => console.error('Error fetching team:', err))
+      .finally(() => setLoading(false));
   }, []);
 
 
@@ -41,8 +52,12 @@ export default function Team() {
       {/* Profiles Grid */}
       <section className="py-20 px-6 lg:px-12 bg-white border-b border-slate-200/60">
         <div className="max-w-7xl mx-auto space-y-16">
-          {team.map((member) => {
-            return (
+          {loading ? (
+            <div className="flex justify-center items-center py-16">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-brand-blue" />
+            </div>
+          ) : Array.isArray(team) && team.length > 0 ? (
+            team.map((member) => (
               <div 
                 key={member._id} 
                 className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start border border-slate-200/60 p-5 sm:p-6 rounded-3xl bg-slate-50/30 shadow-sm"
@@ -56,13 +71,15 @@ export default function Team() {
                       loading="lazy"
                       decoding="async"
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        console.warn(`[Image Load Warning] ${member.name} image failed to load from:`, e.target.src);
+                      }}
                     />
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-brand-navy">{member.name}</h2>
                     <p className="text-xs font-semibold text-brand-blue uppercase tracking-wider mt-1">{member.role}</p>
                   </div>
-                  
                 </div>
 
                 {/* Right Column: Bio */}
@@ -79,8 +96,10 @@ export default function Team() {
                   </div>
                 </div>
               </div>
-            );
-          })}
+            ))
+          ) : (
+            <div className="text-center text-slate-500 py-10">No team profiles available.</div>
+          )}
         </div>
       </section>
 

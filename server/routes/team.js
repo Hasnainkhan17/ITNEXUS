@@ -42,13 +42,44 @@ router.get('/:id/image', async (req, res) => {
   }
 });
 
+// In-memory cache for public team list
+let teamListCache = null;
+let teamListCacheTime = 0;
+const TEAM_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+// Helper to clear team cache
+const clearTeamCache = () => {
+  teamListCache = null;
+  teamListCacheTime = 0;
+};
+
 // @route   GET api/team
 // @desc    Get all active team members (public)
 // @access  Public
 router.get('/', async (req, res) => {
   try {
-    const team = await Team.find({ isActive: true }).sort({ displayOrder: 1, createdAt: 1 });
-    const sanitizedTeam = team.map(sanitizeTeamMember);
+    const now = Date.now();
+    if (req.query.nocache) {
+      clearTeamCache();
+    }
+    if (teamListCache && (now - teamListCacheTime < TEAM_CACHE_TTL)) {
+      return res.json(teamListCache);
+    }
+
+    // Exclude the 5.5MB Base64 imageUrl field from MongoDB query for maximum speed
+    const teamDocs = await Team.find({ isActive: true })
+      .select('-imageUrl')
+      .sort({ displayOrder: 1, createdAt: 1 });
+
+    const sanitizedTeam = teamDocs.map(doc => {
+      const obj = doc.toObject();
+      obj.imageUrl = `/api/team/${obj._id}/image`;
+      return obj;
+    });
+
+    teamListCache = sanitizedTeam;
+    teamListCacheTime = now;
+
     res.json(sanitizedTeam);
   } catch (err) {
     console.error(err.message);
@@ -74,6 +105,7 @@ router.post('/', auth, async (req, res) => {
     });
 
     const member = await newMember.save();
+    clearTeamCache();
     res.json(sanitizeTeamMember(member));
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -107,6 +139,7 @@ router.put('/:id', auth, async (req, res) => {
     member.isActive = isActive !== undefined ? isActive : member.isActive;
 
     await member.save();
+    clearTeamCache();
     res.json(sanitizeTeamMember(member));
   } catch (err) {
     if (err.name === 'ValidationError') {
